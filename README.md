@@ -33,6 +33,42 @@ chmod +x scripts/setup_kairis.sh scripts/start_kairis.sh
 O instalador reconhece `apt`, `dnf`, `pacman` e `zypper`. Se Python estiver ausente,
 a instalação é oferecida antes de qualquer alteração no sistema.
 
+## Atualização automática segura
+
+Durante a configuração inicial, o assistente pergunta uma vez se o pesquisador
+autoriza atualizações automáticas de código e dependências. A escolha fica somente
+em `config/local_config.json`, que não é versionado. Quando autorizada, os scripts
+de inicialização executam o atualizador antes de abrir o painel ou iniciar o modo
+contínuo.
+
+O atualizador:
+
+- usa apenas fast-forward da branch configurada;
+- nunca sobrescreve alterações locais versionadas;
+- continua com a versão instalada quando não há rede;
+- sincroniza `requirements.lock` somente quando ele mudou;
+- registra o resultado em `output/update_status.json`;
+- registra o commit Git usado na proveniência de cada amostra.
+
+A instalação precisa ser um clone Git com o remoto `origin`. Este checkout ainda
+não possui a URL oficial configurada. Quando ela estiver disponível:
+
+```bash
+git remote add origin URL_OFICIAL_DO_REPOSITORIO
+git branch --set-upstream-to=origin/main main
+```
+
+Downloads por arquivo ZIP não contêm os metadados Git necessários para atualização.
+Para iniciar excepcionalmente sem consultar atualizações:
+
+```powershell
+.\scripts\start_kairis.ps1 -NoUpdate
+```
+
+```bash
+./scripts/start_kairis.sh --no-update --no-open
+```
+
 ## Ollama opcional e escolha por memória
 
 O protocolo funciona integralmente sem LLM, usando a interpretação determinística.
@@ -69,6 +105,8 @@ O interruptor **LLM local pelo Ollama** controla a interpretação tanto na exec
 única quanto no modo contínuo. Durante o monitoramento, uma mudança passa a valer
 antes da próxima amostra, sem reiniciar o processo. Quando desligada, a análise por
 regras continua funcionando normalmente.
+O campo **Atualização** mostra se a instalação está em dia, sem rede, sem remoto ou
+bloqueada por alterações locais.
 
 Execução manual no Windows:
 

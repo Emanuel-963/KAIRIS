@@ -195,6 +195,16 @@ class PipelineManager:
             )
         return reports
 
+    def _update_status(self) -> dict[str, Any] | None:
+        path = self.output_dir / "update_status.json"
+        if not path.is_file():
+            return None
+        try:
+            payload = json.loads(path.read_text(encoding="utf-8"))
+            return payload if isinstance(payload, dict) else None
+        except (OSError, json.JSONDecodeError):
+            return None
+
     def status(self) -> dict[str, Any]:
         with self._lock:
             self._refresh()
@@ -207,6 +217,7 @@ class PipelineManager:
                 "started_at": self._started_at.isoformat() if self._started_at else None,
                 "exit_code": self._last_exit_code,
                 "llm_enabled": read_llm_enabled(self.llm_control_path, self._llm_default),
+                "update": self._update_status(),
                 "progress": self._progress(log_text),
                 "log": "\n".join(lines[-250:]),
                 "input_files": self._input_files(),

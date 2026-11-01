@@ -12,5 +12,6 @@ __pycache__/
 output/
 data/input/
 .env
+config/local_config.json
 *.tmp
 

@@ -153,6 +153,7 @@ def test_provenance_in_consolidated_metrics(tmp_path):
     assert provenance["input_sha256"] == hashlib.sha256(source.read_bytes()).hexdigest()
     datetime.fromisoformat(provenance["execution_timestamp"])
     assert set(provenance["package_versions"]) == {"numpy", "scipy", "pandas", "matplotlib"}
+    assert provenance["kairis_git_commit"]
     assert "llm_api_key_env" not in provenance["effective_config"]
     assert metrics["memory"]["enabled"] is True
     memory = json.loads((output / "memory" / "kairis_memory.json").read_text(encoding="utf-8"))

@@ -3,7 +3,7 @@
 const $ = selector => document.querySelector(selector);
 const elements = {
   status: $("#system-status"), mode: $("#mode-badge"), run: $("#run-once"), watch: $("#start-watch"), stop: $("#stop-run"),
-  pid: $("#runtime-pid"), start: $("#runtime-start"), exit: $("#runtime-exit"), progress: $("#progress-content"), pulse: $("#pulse-label"),
+  pid: $("#runtime-pid"), start: $("#runtime-start"), exit: $("#runtime-exit"), update: $("#update-state"), progress: $("#progress-content"), pulse: $("#pulse-label"),
   inputs: $("#file-list"), inputCount: $("#input-count"), reports: $("#reports"), reportCount: $("#report-count"), log: $("#log-output"),
   form: $("#upload-form"), fileInput: $("#file-input"), selected: $("#selected-files"), dropzone: $("#dropzone"), toast: $("#toast"),
   llmToggle: $("#llm-toggle"), llmState: $("#llm-state"),
@@ -16,6 +16,7 @@ function escapeHtml(value) { const node = document.createElement("span"); node.t
 function formatBytes(bytes) { if (bytes < 1024) return `${bytes} B`; if (bytes < 1048576) return `${(bytes/1024).toFixed(1)} KB`; return `${(bytes/1048576).toFixed(1)} MB`; }
 function formatDate(value) { return value ? new Intl.DateTimeFormat("pt-BR", { dateStyle: "short", timeStyle: "medium" }).format(new Date(value)) : "—"; }
 function shortNumber(value) { return Number.isFinite(Number(value)) ? Number(value).toPrecision(4) : "—"; }
+function updateLabel(update) { const labels={updated:"Atualizado",up_to_date:"Em dia",update_available:"Disponível",no_remote:"Sem origin",network_error:"Sem rede",local_changes:"Alterações locais",diverged:"Histórico divergente",disabled:"Desativada",not_git_checkout:"Sem Git",update_failed:"Falhou"}; return update ? (labels[update.state] || update.state) : "Não verificada"; }
 function toast(message, error=false) { clearTimeout(toastTimer); elements.toast.textContent = message; elements.toast.className = error ? "show error" : "show"; toastTimer = setTimeout(() => elements.toast.className = "", 3200); }
 
 async function api(url, options={}) {
@@ -50,6 +51,7 @@ function renderStatus(state) {
   elements.run.disabled = state.running; elements.watch.disabled = state.running; elements.stop.disabled = !state.running;
   elements.llmToggle.checked = Boolean(state.llm_enabled); elements.llmState.textContent = state.llm_enabled ? "Ativada · memória persistente" : "Desativada · somente regras";
   elements.pid.textContent = state.pid ?? "—"; elements.start.textContent = formatDate(state.started_at); elements.exit.textContent = state.running ? "—" : (state.exit_code ?? "—");
+  elements.update.textContent = updateLabel(state.update);
   renderInputs(state.input_files); renderProgress(state.progress); renderReports(state.reports);
   const nearBottom = elements.log.scrollHeight - elements.log.scrollTop - elements.log.clientHeight < 70;
   elements.log.textContent = state.log || "Aguardando atividade do pipeline…";

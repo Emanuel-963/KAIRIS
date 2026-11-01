@@ -133,11 +133,35 @@ class Agent5_Orchestrator:
                 packages[package] = version(package)
             except PackageNotFoundError:
                 packages[package] = "not-installed"
+        git_commit = None
+        git_dirty = None
+        try:
+            project_dir = Path(__file__).resolve().parents[1]
+            git_commit = subprocess.check_output(
+                ["git", "rev-parse", "HEAD"],
+                cwd=project_dir,
+                text=True,
+                stderr=subprocess.DEVNULL,
+                timeout=5,
+            ).strip()
+            git_dirty = bool(
+                subprocess.check_output(
+                    ["git", "status", "--porcelain", "--untracked-files=no"],
+                    cwd=project_dir,
+                    text=True,
+                    stderr=subprocess.DEVNULL,
+                    timeout=5,
+                ).strip()
+            )
+        except (OSError, subprocess.SubprocessError):
+            pass
         return {
             "input_file": str(source.resolve()),
             "input_sha256": digest.hexdigest(),
             "execution_timestamp": datetime.now().astimezone().isoformat(),
             "package_versions": packages,
+            "kairis_git_commit": git_commit,
+            "kairis_git_dirty": git_dirty,
             "effective_config": self._sanitized_config(self.config),
         }
 

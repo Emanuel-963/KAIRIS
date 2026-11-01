@@ -1,4 +1,4 @@
-param([switch]$Yes, [switch]$SkipOllama)
+param([switch]$Yes, [switch]$SkipOllama, [switch]$SkipAutoUpdate)
 
 $ErrorActionPreference = "Stop"
 $env:PYTHONUTF8 = "1"
@@ -42,5 +42,6 @@ $VenvPython = Join-Path $ProjectDir ".venv\Scripts\python.exe"
 $arguments = @("setup_kairis.py")
 if ($Yes) { $arguments += "--yes" }
 if ($SkipOllama) { $arguments += "--skip-ollama" }
+if ($SkipAutoUpdate) { $arguments += "--skip-auto-update" }
 & $VenvPython @arguments
 Write-Host "KAIRIS configurado. Execute scripts\start_kairis.ps1"

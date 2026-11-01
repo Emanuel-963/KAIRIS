@@ -5,7 +5,8 @@
   "type": "object",
   "additionalProperties": false,
   "required": [
-    "protocol_name", "btlab_encoding", "btlab_decimal", "btlab_separator",
+    "protocol_name", "auto_update_enabled", "auto_update_remote", "auto_update_branch",
+    "auto_update_install_dependencies", "btlab_encoding", "btlab_decimal", "btlab_separator",
     "smoothness_threshold_strict", "smoothness_threshold_permissive", "smoothness_min_points",
     "lin_kk_min_points", "lin_kk_mu_cutoff", "lin_kk_max_rc_elements", "lin_kk_add_capacitance",
     "lin_kk_point_threshold_pct", "lin_kk_rmse_threshold_pct", "lin_kk_max_failure_pct",
@@ -20,6 +21,10 @@
   ],
   "properties": {
     "protocol_name": {"const": "KAIRIS"},
+    "auto_update_enabled": {"type": "boolean"},
+    "auto_update_remote": {"type": "string", "minLength": 1},
+    "auto_update_branch": {"type": "string", "minLength": 1},
+    "auto_update_install_dependencies": {"type": "boolean"},
     "btlab_encoding": {"type": "string", "minLength": 1},
     "btlab_decimal": {"type": "string", "enum": [".", ","]},
     "btlab_separator": {"type": "string", "minLength": 1, "maxLength": 2},

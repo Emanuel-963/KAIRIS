@@ -17,6 +17,7 @@ from pathlib import Path
 from typing import Any
 
 from core.artifact_io import atomic_write_text
+from core.config_loader import load_config
 
 
 PROJECT_DIR = Path(__file__).resolve().parent
@@ -220,6 +221,7 @@ def main() -> int:
     parser.add_argument("--yes", action="store_true", help="Confirmar opções de instalação solicitadas")
     parser.add_argument("--model", help="Modelo Ollama preferido")
     parser.add_argument("--skip-ollama", action="store_true", help="Não oferecer Ollama ou modelos")
+    parser.add_argument("--skip-auto-update", action="store_true", help="Manter atualizações automáticas desativadas")
     args = parser.parse_args()
 
     if sys.version_info < (3, 10):
@@ -236,13 +238,28 @@ def main() -> int:
         return 0 if not missing else 1
 
     config_path = Path(args.config).resolve()
-    config = json.loads(config_path.read_text(encoding="utf-8"))
+    config = load_config(config_path)
+    if args.skip_auto_update:
+        config["auto_update_enabled"] = False
+    else:
+        config["auto_update_enabled"] = ask(
+            "Deseja atualizar automaticamente código e dependências antes de iniciar o KAIRIS?",
+            default=True,
+            assume_yes=args.yes,
+        )
     if args.skip_ollama:
         config["llm_enabled"] = False
     else:
         configure_ollama(config, memory_gb, args.yes, args.model)
-    atomic_write_text(config_path, json.dumps(config, ensure_ascii=False, indent=2) + "\n")
-    print(f"Configuração salva em {config_path}")
+    if config_path == DEFAULT_CONFIG.resolve():
+        destination = config_path.with_name("local_config.json")
+        local_keys = ("auto_update_enabled", "llm_enabled", "llm_provider", "ollama_model")
+        local_config = {key: config[key] for key in local_keys if key in config}
+    else:
+        destination = config_path
+        local_config = config
+    atomic_write_text(destination, json.dumps(local_config, ensure_ascii=False, indent=2) + "\n")
+    print(f"Configuração local salva em {destination}")
     return 0
 
 

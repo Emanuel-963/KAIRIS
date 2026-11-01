@@ -1,5 +1,9 @@
 {
   "protocol_name": "KAIRIS",
+  "auto_update_enabled": false,
+  "auto_update_remote": "origin",
+  "auto_update_branch": "main",
+  "auto_update_install_dependencies": true,
   "btlab_encoding": "latin-1",
   "btlab_decimal": ",",
   "btlab_separator": "\t",
