@@ -16,7 +16,9 @@
     "ollama_model", "ollama_autostart", "ollama_startup_timeout_seconds", "ollama_timeout_seconds",
     "ollama_temperature", "ollama_context_tokens", "ollama_max_output_tokens", "ollama_think",
     "ollama_model_profiles", "llm_fallback_rules_only", "llm_memory_enabled",
-    "llm_memory_recent_records", "llm_memory_max_prompt_chars", "report_d3_inline",
+    "llm_memory_recent_records", "llm_memory_max_prompt_chars", "supervised_learning_enabled",
+    "supervised_examples_in_prompt", "supervised_examples_max_chars",
+    "finetune_min_validated_examples", "report_d3_inline",
     "_reserved_not_yet_implemented"
   ],
   "properties": {
@@ -74,6 +76,10 @@
     "llm_memory_enabled": {"type": "boolean"},
     "llm_memory_recent_records": {"type": "integer", "minimum": 0, "maximum": 100},
     "llm_memory_max_prompt_chars": {"type": "integer", "minimum": 500, "maximum": 100000},
+    "supervised_learning_enabled": {"type": "boolean"},
+    "supervised_examples_in_prompt": {"type": "integer", "minimum": 0, "maximum": 20},
+    "supervised_examples_max_chars": {"type": "integer", "minimum": 500, "maximum": 50000},
+    "finetune_min_validated_examples": {"type": "integer", "minimum": 10, "maximum": 1000000},
     "report_d3_inline": {"type": "boolean"},
     "_reserved_not_yet_implemented": {
       "type": "object", "additionalProperties": false,

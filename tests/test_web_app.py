@@ -42,6 +42,7 @@ class WebAppTest(unittest.TestCase):
         self.assertEqual(page.status_code, 200)
         self.assertIn(b"KAIRIS", page.data)
         self.assertIn(b"llm-toggle", page.data)
+        self.assertIn(b"feedback-dialog", page.data)
         self.assertEqual(self.client.get("/health").get_json()["status"], "ok")
 
         started = self.client.post("/api/run")
@@ -70,6 +71,25 @@ class WebAppTest(unittest.TestCase):
         self.assertIn(b"Valida\xc3\xa7\xc3\xa3o linear Kramers-Kronig (Lin-KK)", report.data)
         self.assertIn(b"Res\xc3\xadduo normalizado Lin-KK", report.data)
         report.close()
+
+        sample = status["reports"][0]["sample"]
+        feedback = self.client.post(
+            "/api/feedback",
+            json={
+                "sample": sample,
+                "verdict": "corrected",
+                "correction": "Interpretação revisada por pesquisador.",
+                "notes": "Exemplo de validação automatizada.",
+            },
+        )
+        self.assertEqual(feedback.status_code, 200)
+        reviewed = feedback.get_json()
+        self.assertEqual(reviewed["training"]["corrected"], 1)
+        self.assertEqual(reviewed["training"]["dataset_examples"], 1)
+        self.assertEqual(reviewed["reports"][0]["feedback"], "corrected")
+        dataset = self.client.get("/training/dataset.jsonl")
+        self.assertEqual(dataset.status_code, 200)
+        self.assertIn(b"Interpreta", dataset.data)
 
         watched = self.client.post("/api/watch/start").get_json()
         self.assertTrue(watched["running"])

@@ -22,6 +22,7 @@ if __package__ in (None, ""):
 
 from core.report_builder import build_html_report, save_json
 from core.memory_store import KairisMemoryStore
+from core.training_feedback import TrainingFeedbackStore
 
 
 class Agent5_Orchestrator:
@@ -67,7 +68,19 @@ class Agent5_Orchestrator:
             if memory_enabled
             else []
         )
-        llm_text = self._optional_llm(summary, interpretations, memory_records)
+        training_store = TrainingFeedbackStore(output_dir)
+        supervised_enabled = bool(self.config.get("supervised_learning_enabled", True))
+        validated_examples = (
+            training_store.prompt_examples(
+                int(self.config.get("supervised_examples_in_prompt", 3)),
+                int(self.config.get("supervised_examples_max_chars", 5000)),
+            )
+            if supervised_enabled
+            else []
+        )
+        llm_text = self._optional_llm(
+            summary, interpretations, memory_records, validated_examples
+        )
         metrics_agents = {
             agent: {key: value for key, value in payload.items() if key != "figures"}
             for agent, payload in self.outputs.items()
@@ -90,12 +103,22 @@ class Agent5_Orchestrator:
             "records_total": memory_total,
             "path": str(memory_store.path.resolve()) if memory_enabled else None,
         }
-        metrics = {"sample": sample_name, "provenance": provenance, "summary": summary, "interpretation_rules": interpretations, "llm_interpretation": llm_text, "llm": self.llm_status, "memory": memory_status, "agents": metrics_agents}
+        training_status = training_store.stats()
+        finetune_minimum = int(self.config.get("finetune_min_validated_examples", 50))
+        training_status.update(
+            {
+                "enabled": supervised_enabled,
+                "validated_examples_used": len(validated_examples),
+                "finetune_min_validated_examples": finetune_minimum,
+                "finetune_ready": training_status["dataset_examples"] >= finetune_minimum,
+            }
+        )
+        metrics = {"sample": sample_name, "provenance": provenance, "summary": summary, "interpretation_rules": interpretations, "llm_interpretation": llm_text, "llm": self.llm_status, "memory": memory_status, "training": training_status, "agents": metrics_agents}
         metrics_path = Path(output_dir) / "metrics" / f"{sample_name}_metrics.json"
         report_path = Path(output_dir) / "reports" / f"{sample_name}_report.html"
         save_json(metrics_path, metrics)
         build_html_report(report_path, sample_name, self.config, self.outputs, summary, interpretations, llm_text, provenance)
-        return {"metrics": str(metrics_path.resolve()), "report": str(report_path.resolve()), "summary": summary, "interpretation_rules": interpretations, "llm": self.llm_status, "memory": memory_status}
+        return {"metrics": str(metrics_path.resolve()), "report": str(report_path.resolve()), "summary": summary, "interpretation_rules": interpretations, "llm": self.llm_status, "memory": memory_status, "training": training_status}
 
     @staticmethod
     def _sanitized_config(config: dict[str, Any]) -> dict[str, Any]:
@@ -212,6 +235,7 @@ class Agent5_Orchestrator:
         summary: dict[str, Any],
         rules: list[str],
         memory_records: list[dict[str, Any]] | None = None,
+        validated_examples: list[dict[str, Any]] | None = None,
     ) -> str | None:
         if not bool(self.config.get("llm_enabled", False)):
             self.llm_status["status"] = "disabled"
@@ -220,7 +244,9 @@ class Agent5_Orchestrator:
         provider = str(self.config.get("llm_provider", "ollama")).strip().lower()
         if provider in {"ollama", "auto"}:
             try:
-                return self._ollama_interpretation(summary, rules, memory_records)
+                return self._ollama_interpretation(
+                    summary, rules, memory_records, validated_examples
+                )
             except Exception as error:
                 self.llm_status = {
                     "enabled": True,
@@ -250,7 +276,9 @@ class Agent5_Orchestrator:
             model = str(self.config.get("llm_model", "gpt-4o-mini"))
             response = OpenAI(api_key=api_key).responses.create(
                 model=model,
-                input=self._llm_prompt(summary, rules, memory_records),
+                input=self._llm_prompt(
+                    summary, rules, memory_records, validated_examples
+                ),
             )
             text = response.output_text.strip()
             if not text:
@@ -273,12 +301,20 @@ class Agent5_Orchestrator:
         summary: dict[str, Any],
         rules: list[str],
         memory_records: list[dict[str, Any]] | None = None,
+        validated_examples: list[dict[str, Any]] | None = None,
     ) -> str:
         """Build the grounded KAIRIS interpretation prompt."""
         context_path = Path(__file__).resolve().parents[1] / "models" / "orchestrator_context.txt"
         context = context_path.read_text(encoding="utf-8")
         metrics = json.dumps(summary, ensure_ascii=False, indent=2)
         rule_text = "\n".join(f"- {rule}" for rule in rules)
+        examples_text = ""
+        if validated_examples:
+            examples_text = (
+                "\n\nExemplos revisados por pesquisadores (imite o rigor e o limite "
+                "interpretativo, não copie números de outras amostras):\n"
+                + json.dumps(validated_examples, ensure_ascii=False, indent=2)
+            )
         memory_text = ""
         if memory_records:
             memory_text = (
@@ -288,7 +324,7 @@ class Agent5_Orchestrator:
             )
         return (
             f"{context}\n\nMétricas KAIRIS:\n{metrics}\n\n"
-            f"Interpretação determinística:\n{rule_text}{memory_text}\n\n"
+            f"Interpretação determinística:\n{rule_text}{examples_text}{memory_text}\n\n"
             "Produza um único parágrafo objetivo em português, sem extrapolar "
             "os dados e sem sugerir diagnóstico clínico ou mecanismo não medido."
         )
@@ -298,6 +334,7 @@ class Agent5_Orchestrator:
         summary: dict[str, Any],
         rules: list[str],
         memory_records: list[dict[str, Any]] | None = None,
+        validated_examples: list[dict[str, Any]] | None = None,
     ) -> str:
         """Use a running local Ollama service and an already installed model."""
         base_url = str(self.config.get("ollama_base_url", "http://127.0.0.1:11434")).rstrip("/")
@@ -315,7 +352,9 @@ class Agent5_Orchestrator:
         model = self._select_ollama_model(preferred, models)
         payload = {
             "model": model,
-            "prompt": self._llm_prompt(summary, rules, memory_records),
+            "prompt": self._llm_prompt(
+                summary, rules, memory_records, validated_examples
+            ),
             "stream": False,
             "think": bool(self.config.get("ollama_think", False)),
             "options": {

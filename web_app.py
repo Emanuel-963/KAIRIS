@@ -21,6 +21,7 @@ from werkzeug.utils import secure_filename
 
 from core.config_loader import load_config
 from core.runtime_control import read_llm_enabled, write_llm_enabled
+from core.training_feedback import TrainingFeedbackStore
 
 
 PROJECT_DIR = Path(__file__).resolve().parent
@@ -45,9 +46,11 @@ class PipelineManager:
         for child in ("metrics", "figures", "reports"):
             (self.output_dir / child).mkdir(parents=True, exist_ok=True)
         self.llm_control_path = self.output_dir / "runtime_control.json"
-        self._llm_default = bool(load_config(self.config_path).get("llm_enabled", False))
+        self._effective_config = load_config(self.config_path)
+        self._llm_default = bool(self._effective_config.get("llm_enabled", False))
         if not self.llm_control_path.is_file():
             write_llm_enabled(self.llm_control_path, self._llm_default)
+        self.training_store = TrainingFeedbackStore(self.output_dir)
         self._lock = threading.RLock()
         self._process: subprocess.Popen[str] | None = None
         self._stream: Any = None
@@ -174,15 +177,22 @@ class PipelineManager:
 
     def _reports(self) -> list[dict[str, Any]]:
         reports = []
+        reviewed = self.training_store.latest()
         for path in sorted((self.output_dir / "reports").glob("*_report.html"), key=lambda item: item.stat().st_mtime, reverse=True):
             sample = path.name.removesuffix("_report.html")
             summary = None
+            llm_interpretation = None
+            input_sha256 = ""
             metrics_path = self.output_dir / "metrics" / f"{sample}_metrics.json"
             if metrics_path.is_file():
                 try:
-                    summary = json.loads(metrics_path.read_text(encoding="utf-8")).get("summary")
+                    metrics = json.loads(metrics_path.read_text(encoding="utf-8"))
+                    summary = metrics.get("summary")
+                    llm_interpretation = metrics.get("llm_interpretation")
+                    input_sha256 = str(metrics.get("provenance", {}).get("input_sha256", ""))
                 except (OSError, json.JSONDecodeError):
                     summary = None
+            review = reviewed.get((sample, input_sha256))
             reports.append(
                 {
                     "name": path.name,
@@ -191,6 +201,8 @@ class PipelineManager:
                     "modified": datetime.fromtimestamp(path.stat().st_mtime).astimezone().isoformat(),
                     "url": f"/reports/{path.name}",
                     "summary": summary,
+                    "has_llm_interpretation": bool(llm_interpretation),
+                    "feedback": review.get("verdict") if review else None,
                 }
             )
         return reports
@@ -205,6 +217,13 @@ class PipelineManager:
         except (OSError, json.JSONDecodeError):
             return None
 
+    def _training_status(self) -> dict[str, Any]:
+        stats = self.training_store.stats()
+        minimum = int(self._effective_config.get("finetune_min_validated_examples", 50))
+        stats["finetune_min_validated_examples"] = minimum
+        stats["finetune_ready"] = stats["dataset_examples"] >= minimum
+        return stats
+
     def status(self) -> dict[str, Any]:
         with self._lock:
             self._refresh()
@@ -218,6 +237,7 @@ class PipelineManager:
                 "exit_code": self._last_exit_code,
                 "llm_enabled": read_llm_enabled(self.llm_control_path, self._llm_default),
                 "update": self._update_status(),
+                "training": self._training_status(),
                 "progress": self._progress(log_text),
                 "log": "\n".join(lines[-250:]),
                 "input_files": self._input_files(),
@@ -229,6 +249,18 @@ class PipelineManager:
         with self._lock:
             write_llm_enabled(self.llm_control_path, enabled)
             return self.status()
+
+    def review_sample(
+        self, sample: str, verdict: str, correction: str = "", notes: str = ""
+    ) -> dict[str, Any]:
+        if not sample or Path(sample).name != sample:
+            raise ValueError("Identificador de amostra inválido.")
+        metrics_path = self.output_dir / "metrics" / f"{sample}_metrics.json"
+        if not metrics_path.is_file():
+            raise FileNotFoundError(f"Métricas não encontradas para {sample}.")
+        metrics = json.loads(metrics_path.read_text(encoding="utf-8"))
+        self.training_store.review(metrics, verdict, correction, notes)
+        return self.status()
 
 
 def unique_destination(directory: Path, original_name: str) -> Path:
@@ -306,6 +338,38 @@ def create_app(
         if not isinstance(enabled, bool):
             return jsonify({"error": "O campo booleano 'enabled' é obrigatório"}), 400
         return jsonify(manager.set_llm_enabled(enabled))
+
+    @app.post("/api/feedback")
+    def api_feedback() -> Any:
+        payload = request.get_json(silent=True) or {}
+        try:
+            correction = str(payload.get("correction") or "")
+            notes = str(payload.get("notes") or "")
+            if len(correction) > 20000 or len(notes) > 5000:
+                raise ValueError("Correção ou observação excede o limite permitido.")
+            return jsonify(
+                manager.review_sample(
+                    str(payload.get("sample") or ""),
+                    str(payload.get("verdict") or ""),
+                    correction,
+                    notes,
+                )
+            )
+        except FileNotFoundError as error:
+            return jsonify({"error": str(error)}), 404
+        except (OSError, ValueError, json.JSONDecodeError) as error:
+            return jsonify({"error": str(error)}), 400
+
+    @app.get("/training/dataset.jsonl")
+    def training_dataset() -> Any:
+        if not manager.training_store.dataset_path.is_file():
+            return jsonify({"error": "Ainda não há exemplos aprovados ou corrigidos."}), 404
+        return send_from_directory(
+            manager.training_store.dataset_path.parent,
+            manager.training_store.dataset_path.name,
+            as_attachment=True,
+            download_name="kairis_training_dataset.jsonl",
+        )
 
     @app.post("/api/watch/start")
     def api_watch_start() -> Any:

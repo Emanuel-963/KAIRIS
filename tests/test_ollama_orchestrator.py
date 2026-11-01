@@ -72,3 +72,13 @@ def test_prompt_contains_bounded_persistent_memory():
     assert "Memória KAIRIS de execuções anteriores" in prompt
     assert "Conclusão anterior" in prompt
     assert "não altere as métricas atuais" in prompt
+
+
+def test_prompt_prioritizes_human_reviewed_examples():
+    examples = [{"summary": {"R_ct": 12}, "reviewed_answer": "Resposta validada."}]
+
+    prompt = _orchestrator()._llm_prompt(SUMMARY, RULES, [], examples)
+
+    assert "Exemplos revisados por pesquisadores" in prompt
+    assert "Resposta validada" in prompt
+    assert "não copie números de outras amostras" in prompt

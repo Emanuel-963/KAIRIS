@@ -73,7 +73,11 @@
     </section>
 
     <section class="panel reports-panel">
-      <div class="panel-heading"><div><p class="step">04 · RESULTADOS</p><h3>Relatórios interativos</h3></div><button class="button ghost" id="refresh">↻ Atualizar</button></div>
+      <div class="panel-heading"><div><p class="step">04 · RESULTADOS E APRENDIZADO</p><h3>Relatórios interativos</h3></div><button class="button ghost" id="refresh">↻ Atualizar</button></div>
+      <div class="training-summary" id="training-summary">
+        <div><b>0</b><span>aprovadas</span></div><div><b>0</b><span>corrigidas</span></div><div><b>0</b><span>rejeitadas</span></div><div><b>0</b><span>exemplos no dataset</span></div>
+      </div>
+      <div class="training-actions"><span id="finetune-readiness">Somente avaliações humanas entram no aprendizado.</span><a id="download-dataset" class="button ghost" href="/training/dataset.jsonl">Baixar dataset JSONL</a></div>
       <div id="reports" class="report-grid"><div class="empty-state">Nenhum relatório gerado.</div></div>
     </section>
 
@@ -86,6 +90,18 @@
   <dialog id="report-dialog">
     <div class="dialog-bar"><strong id="dialog-title">Relatório KAIRIS</strong><div><a id="open-tab" target="_blank" rel="noopener">Abrir em nova aba</a><button id="close-dialog" aria-label="Fechar">×</button></div></div>
     <iframe id="report-frame" title="Relatório KAIRIS"></iframe>
+  </dialog>
+  <dialog id="feedback-dialog" class="feedback-dialog">
+    <form id="feedback-form">
+      <div class="dialog-bar"><strong>Corrigir interpretação · <span id="feedback-sample"></span></strong><button type="button" id="close-feedback" aria-label="Fechar">×</button></div>
+      <div class="feedback-body">
+        <label for="feedback-correction">Interpretação científica corrigida</label>
+        <textarea id="feedback-correction" maxlength="20000" required placeholder="Escreva a conclusão que deveria ser usada como exemplo validado."></textarea>
+        <label for="feedback-notes">Observação interna opcional</label>
+        <textarea id="feedback-notes" maxlength="5000" placeholder="Motivo da correção, ressalvas ou critérios usados."></textarea>
+        <div class="feedback-buttons"><button type="button" class="button ghost" id="cancel-feedback">Cancelar</button><button type="submit" class="button primary">Salvar correção e atualizar dataset</button></div>
+      </div>
+    </form>
   </dialog>
   <div id="toast" role="status" aria-live="polite"></div>
   <script src="{{ url_for('static', filename='app.js') }}" defer></script>

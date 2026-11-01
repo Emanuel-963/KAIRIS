@@ -3,6 +3,7 @@
 .kairis_smoke/
 .agent_cli_test/
 .web_preview/
+.web_training_preview/
 .pip-tools-cache/
 .pytest_cache/
 .coverage

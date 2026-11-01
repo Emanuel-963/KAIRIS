@@ -172,6 +172,25 @@ incluída em cada prompt. Ela é configurada por:
 A memória serve como contexto comparativo. As métricas da amostra atual continuam
 sendo a fonte primária e não são substituídas por conclusões anteriores.
 
+## Aprendizado supervisionado por pesquisadores
+
+Cada relatório no painel pode ser marcado como **Aprovar**, **Corrigir** ou
+**Rejeitar**. O KAIRIS mantém o histórico completo das avaliações e reconstrói
+automaticamente um dataset supervisionado após cada decisão:
+
+- `output/training/feedback.json`: trilha de auditoria de todas as revisões;
+- `output/training/dataset.jsonl`: somente a revisão mais recente de cada espectro,
+  incluindo aprovadas e corrigidas; rejeitadas ficam fora do dataset.
+
+Exemplos validados passam a ser usados imediatamente como few-shot no prompt do
+Ollama. Isso melhora o comportamento sem treinamento pesado e é adequado aos PCs de
+4–8 GB. O painel permite baixar o JSONL e mostra o progresso até o mínimo configurado
+por `finetune_min_validated_examples`.
+
+O ajuste real dos pesos não é executado silenciosamente. Ele exige um modelo-base
+definido, ambiente separado com GPU e validação do dataset. Consulte
+[`TRAINING.md`](TRAINING.md) para o fluxo e as garantias adotadas.
+
 ## Relatórios offline
 
 O padrão carrega D3.js pelo CDN. Para gerar um HTML que também incorpore o D3, defina
