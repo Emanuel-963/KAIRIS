@@ -151,6 +151,14 @@ def main() -> int:
     parser.add_argument("--corpus", type=Path, default=DEFAULT_CORPUS)
     parser.add_argument("--config", type=Path, default=PROJECT / "config" / "protocol_config.json")
     parser.add_argument("--output", type=Path, default=PROJECT / "output" / "validation_corpus")
+    parser.add_argument(
+        "--evidence-dir",
+        type=Path,
+        help=(
+            "Diretório dos manifestos da execução; o padrão histórico é "
+            "<corpus>/validation_evidence"
+        ),
+    )
     parser.add_argument("--full-pipeline", action="store_true", help="executar Agentes 1 a 5 em cada espectro")
     parser.add_argument("--overwrite", action="store_true", help="reprocessar resultados existentes")
     parser.add_argument("--limit", type=int, help="limitar o número de espectros para smoke test")
@@ -179,7 +187,11 @@ def main() -> int:
         "drt_gsf_disagreements_with_report": disagreements,
         "llm_enabled": False,
     }
-    evidence = corpus / "validation_evidence"
+    evidence = (
+        args.evidence_dir.resolve()
+        if args.evidence_dir is not None
+        else corpus / "validation_evidence"
+    )
     atomic_write_text(
         evidence / "last_run_summary.json",
         json.dumps(summary, ensure_ascii=False, indent=2) + "\n",

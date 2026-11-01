@@ -1,0 +1,22 @@
+{
+  "format": "KAIRIS-validation-acceptance-v1",
+  "status": "development_acceptance_not_confirmatory",
+  "scope": "synthetic randles_rc reference family and release provenance",
+  "thresholds": {
+    "artifact_completeness_fraction_min": 1.0,
+    "input_hash_match_fraction_min": 1.0,
+    "clean_provenance_fraction_min": 1.0,
+    "current_commit_fraction_min": 1.0,
+    "randles_lin_kk_pass_fraction_min": 0.95,
+    "randles_single_peak_fraction_min": 0.95,
+    "randles_r_inf_relative_error_median_max": 0.02,
+    "randles_r_inf_relative_error_worst_max": 0.05,
+    "randles_log10_tau_error_median_max": 0.10,
+    "randles_log10_tau_error_worst_max": 0.20
+  },
+  "notes": [
+    "These are development acceptance gates, not prospective confirmatory claims.",
+    "The present corpus and its outputs were inspected before this file was frozen.",
+    "Confirmatory thresholds must be approved before collecting or opening a future external dataset."
+  ]
+}

@@ -210,6 +210,25 @@ Consulte o README dentro do corpus antes de usar os dados para treinamento. Dado
 experimentais públicos são tratados como avaliação externa sem rótulo causal;
 interpretações da LLM só entram no dataset supervisionado após revisão humana.
 
+### Validação de uma release limpa
+
+O plano científico e os critérios de desenvolvimento estão em
+`paper/VALIDATION_PLAN_v1.md` e `config/validation_acceptance_v1.json`. Para uma
+execução candidata à publicação, use um commit limpo, uma tag exata e um diretório
+de saída novo:
+
+```powershell
+python scripts/run_release_validation.py `
+  --output output/validation_release_v1 `
+  --require-tag
+```
+
+O comando não reutiliza resultados, mantém as evidências fora do corpus
+versionado e falha se a proveniência ou os critérios de referência Randles não
+forem satisfeitos. Os 198 espectros atuais já foram examinados durante o
+desenvolvimento e, portanto, são validação retrospectiva, não um holdout
+confirmatório intocado.
+
 ## Relatórios offline
 
 O padrão carrega D3.js pelo CDN. Para gerar um HTML que também incorpore o D3, defina
