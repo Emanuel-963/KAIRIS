@@ -56,6 +56,9 @@ class Agent5_Orchestrator:
             "esc_G2_lf": a4["G2"]["lf_point"],
             "esc_G2_flags": a4["G2"]["flags"],
         }
+        summary.update(
+            self._regime_assessment(summary["regime_drt"], summary["regime_gsf"])
+        )
         interpretations = self._interpret(summary)
         provenance = self._provenance()
         memory_enabled = bool(self.config.get("llm_memory_enabled", True))
@@ -189,6 +192,25 @@ class Agent5_Orchestrator:
         }
 
     @staticmethod
+    def _regime_assessment(regime_drt: str, regime_gsf: str) -> dict[str, Any]:
+        """Resolve special two-observable patterns before generic agreement rules."""
+        if regime_drt == "diffusion_dominated" and regime_gsf == "pseudocapacitive":
+            return {
+                "diagnostic": "intercalation_pseudocapacitive",
+                "drt_gsf_inconsistent": False,
+            }
+        compatible = {
+            "kinetic_dominated": {"resistive", "pseudocapacitive"},
+            "diffusion_dominated": {"diffusive"},
+            "mixed": {"mixed", "pseudocapacitive"},
+        }
+        return {
+            "diagnostic": None,
+            "drt_gsf_inconsistent": regime_gsf
+            not in compatible.get(regime_drt, set()),
+        }
+
+    @staticmethod
     def _interpret(summary: dict[str, Any]) -> list[str]:
         messages: list[str] = []
         if summary["lin_kk_valid"]:
@@ -201,12 +223,18 @@ class Agent5_Orchestrator:
             )
         drt = summary["regime_drt"]
         gsf = summary["regime_gsf"]
-        compatible = {
-            "kinetic_dominated": {"resistive", "pseudocapacitive"},
-            "diffusion_dominated": {"diffusive"},
-            "mixed": {"mixed", "pseudocapacitive"},
-        }
-        if gsf in compatible.get(drt, set()):
+        if summary.get("diagnostic") == "intercalation_pseudocapacitive":
+            messages.append(
+                "O DRT identifica processo difusivo dominante no domínio temporal, "
+                "enquanto o GSF classifica o campo espectral global como "
+                "pseudocapacitivo. Esse padrão é consistente com pseudocapacitância "
+                "de intercalação — mecanismo documentado em MXene e outros materiais "
+                "lamelares — onde o transporte iônico é difusivo localmente mas o "
+                "comportamento eletroquímico macroscópico é pseudocapacitivo. Não "
+                "constitui divergência entre os módulos; constitui resolução de dois "
+                "observáveis distintos."
+            )
+        elif not bool(summary.get("drt_gsf_inconsistent", True)):
             messages.append("Consistência alta entre as classificações DRT e GSF.")
         else:
             messages.append(f"Atenção: as classificações DRT ({drt}) e GSF ({gsf}) divergem.")

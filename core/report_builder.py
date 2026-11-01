@@ -74,6 +74,24 @@ def _table(mapping: dict[str, Any]) -> str:
     return "<table>" + "".join(rows) + "</table>"
 
 
+def _diagnostic_badge(summary: dict[str, Any]) -> str:
+    """Render a prominent synthesis label for recognized KAIRIS diagnostics."""
+    if summary.get("diagnostic") != "intercalation_pseudocapacitive":
+        return ""
+    tooltip = (
+        "DRT descreve dominância difusiva no domínio temporal; GSF descreve "
+        "comportamento pseudocapacitivo no campo espectral global. Os módulos "
+        "resolvem observáveis complementares, portanto este padrão não é marcado "
+        "como inconsistência."
+    )
+    escaped = html.escape(tooltip, quote=True)
+    return (
+        '<span class="diagnostic-badge" tabindex="0" '
+        f'data-tooltip="{escaped}" title="{escaped}">'
+        "Intercalation Pseudocapacitive</span>"
+    )
+
+
 def _inline_svg(path: str | Path) -> str:
     """Read a Matplotlib SVG as inline markup, without external file links."""
     content = Path(path).read_text(encoding="utf-8")
@@ -198,6 +216,7 @@ def build_html_report(
     chart_json = _safe_inline_json(_chart_payload(outputs))
     d3_script = _d3_script(config)
     provenance_html = _table(provenance or {})
+    diagnostic_badge = _diagnostic_badge(summary)
 
     document = f"""<!doctype html>
 <html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
@@ -213,6 +232,8 @@ table{{border-collapse:collapse;width:100%;margin:12px 0 20px}}th,td{{border:1px
 .chart{{width:100%;min-height:390px}}.chart svg{{display:block;width:100%;height:auto}}.axis text{{fill:#40535b}}.axis path,.axis line{{stroke:#8799a0}}.series-line{{fill:none;stroke:#176d83;stroke-width:2}}
 .point{{stroke:#fff;stroke-width:.7;cursor:crosshair}}.zoom-hint{{color:var(--muted);font-size:.82rem;margin:2px 8px 8px}}.tooltip{{position:fixed;display:none;z-index:20;pointer-events:none;background:#14272e;color:#fff;padding:8px 10px;border-radius:6px;font-size:12px;line-height:1.45;box-shadow:0 3px 14px #0005}}
 .static-grid{{display:grid;grid-template-columns:repeat(auto-fit,minmax(330px,1fr));gap:16px}}.static-svg{{margin:0;border:1px solid #d8e1e5;border-radius:10px;padding:8px}}.static-svg svg{{max-width:100%;height:auto}}figcaption{{text-align:center;color:var(--muted);font-size:.9rem}}
+.diagnostic-badge{{position:relative;display:inline-block;margin-left:.55rem;padding:.32rem .62rem;border-radius:999px;background:#6a3db8;color:#fff;font-size:.78rem;vertical-align:middle;cursor:help;letter-spacing:.01em}}
+.diagnostic-badge:hover::after,.diagnostic-badge:focus::after{{content:attr(data-tooltip);position:absolute;z-index:30;left:0;top:calc(100% + .5rem);width:min(420px,75vw);padding:.65rem .75rem;border-radius:7px;background:#14272e;color:#fff;font-size:.78rem;font-weight:400;line-height:1.4;box-shadow:0 3px 14px #0005}}
 @media(max-width:600px){{main{{padding:10px}}.chart-grid{{grid-template-columns:1fr}}.chart-card{{padding:4px}}}}
 </style></head><body><main>
 <header><h1>Relatório KAIRIS: {html.escape(sample_name)}</h1><p class="lede">Gerado em {html.escape(generated)} · análise EIS sem circuito equivalente.</p></header>
@@ -232,7 +253,7 @@ table{{border-collapse:collapse;width:100%;margin:12px 0 20px}}th,td{{border:1px
 <section><h2>4. Diagrama de Emanuel-Smith</h2>{_table(agent4_metrics)}<div class="chart-grid">
 {''.join(f'<article class="chart-card"><h3>ESC {group}</h3><p class="zoom-hint">Role para zoom; arraste para navegar.</p><div id="esc-{group.lower()}" class="chart"></div></article>' for group in ('G1','G2','G3','G4'))}
 </div></section>
-<section><h2>5. Síntese integrada</h2>{_table(summary)}<h3>Interpretação por regras</h3><ul>{rules_html}</ul>{llm_html}</section>
+<section><h2>5. Síntese integrada {diagnostic_badge}</h2>{_table(summary)}<h3>Interpretação por regras</h3><ul>{rules_html}</ul>{llm_html}</section>
 <section><h2>Parâmetros KAIRIS</h2>{_table(config)}</section>
 <footer><details><summary>Proveniência da execução</summary>{provenance_html}</details></footer>
 </main><div id="tooltip" class="tooltip"></div>

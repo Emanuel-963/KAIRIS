@@ -98,7 +98,11 @@ def evaluate(
         if summary.get("lin_kk_valid") is True:
             source_stats[source]["lin_kk_valid"] += 1
         rules = metrics.get("interpretation_rules", [])
-        disagreement = any("diverg" in str(item).casefold() for item in rules)
+        disagreement = (
+            bool(summary.get("drt_gsf_inconsistent"))
+            if "drt_gsf_inconsistent" in summary
+            else any("diverg" in str(item).casefold() for item in rules)
+        )
         if disagreement:
             source_stats[source]["drt_gsf_disagreement"] += 1
 

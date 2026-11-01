@@ -101,8 +101,10 @@ def full_pipeline(
                 state = "completed"
             metrics = json.loads(Path(final["metrics"]).read_text(encoding="utf-8"))
             rules = metrics.get("interpretation_rules", [])
-            disagreement = any("diverg" in str(message).casefold() for message in rules)
             summary = metrics.get("summary", {})
+            disagreement = bool(summary.get("drt_gsf_inconsistent")) if "drt_gsf_inconsistent" in summary else any(
+                "diverg" in str(message).casefold() for message in rules
+            )
             results.append(
                 {
                     "sample_id": sample,
