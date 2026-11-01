@@ -12,7 +12,9 @@ import core.report_builder as report_builder
 import run_pipeline
 from core.artifact_io import atomic_text_writer
 from core.config_validator import validate_config
+from core.memory_store import KairisMemoryStore
 from core.report_builder import save_json
+from core.runtime_control import read_llm_enabled, write_llm_enabled
 
 
 PROJECT_DIR = Path(__file__).resolve().parents[1]
@@ -74,6 +76,35 @@ def test_existing_consolidated_result_is_skipped_without_overwrite(tmp_path, mon
     assert len(calls) == 1
 
 
+def test_runtime_llm_control_is_atomic_and_applied_per_sample(tmp_path, monkeypatch):
+    input_dir = tmp_path / "input"
+    output_dir = tmp_path / "output"
+    input_dir.mkdir()
+    (output_dir / "metrics").mkdir(parents=True)
+    sample = input_dir / "sample.txt"
+    sample.write_text("input", encoding="utf-8")
+    control = output_dir / "runtime_control.json"
+    write_llm_enabled(control, True)
+    calls = []
+    monkeypatch.setattr(run_pipeline, "run_sample", lambda *args, **kwargs: calls.append(args))
+
+    assert read_llm_enabled(control, False) is True
+    assert run_pipeline.process_file(sample, input_dir, output_dir, {"llm_enabled": False}, llm_control_path=control)
+    assert calls[0][2]["llm_enabled"] is True
+    assert not (output_dir / "runtime_control.json.tmp").exists()
+
+
+def test_memory_keeps_complete_history_but_bounds_prompt_context(tmp_path):
+    store = KairisMemoryStore(tmp_path / "memory" / "kairis_memory.json")
+    for index in range(5):
+        store.append({"sample": f"sample-{index}", "conclusion": "x" * 40})
+
+    assert len(store.records()) == 5
+    prompt_records = store.prompt_records(limit=2, max_chars=500)
+    assert [record["sample"] for record in prompt_records] == ["sample-3", "sample-4"]
+    assert not (tmp_path / "memory" / "kairis_memory.json.tmp").exists()
+
+
 def test_d3_inline_downloads_once_and_uses_atomic_cache(tmp_path, monkeypatch):
     cache = tmp_path / "d3.min.js"
     downloads = []
@@ -123,6 +154,9 @@ def test_provenance_in_consolidated_metrics(tmp_path):
     datetime.fromisoformat(provenance["execution_timestamp"])
     assert set(provenance["package_versions"]) == {"numpy", "scipy", "pandas", "matplotlib"}
     assert "llm_api_key_env" not in provenance["effective_config"]
+    assert metrics["memory"]["enabled"] is True
+    memory = json.loads((output / "memory" / "kairis_memory.json").read_text(encoding="utf-8"))
+    assert memory["records"][0]["sample"] == "synthetic_btlab"
     report = (output / "reports" / "synthetic_btlab_report.html").read_text(encoding="utf-8")
     assert "Proveniência da execução" in report
     assert provenance["input_sha256"] in report

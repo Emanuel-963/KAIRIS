@@ -45,6 +45,14 @@
       <article class="panel control-panel">
         <div class="panel-heading"><div><p class="step">02 · EXECUÇÃO</p><h3>Controle do pipeline</h3></div><span class="mode-badge" id="mode-badge">INATIVO</span></div>
         <div class="control-copy">A execução única processa a fila atual e encerra. O modo contínuo permanece observando novos arquivos.</div>
+        <div class="llm-control">
+          <div><strong>LLM local pelo Ollama</strong><span id="llm-state">Consultando estado…</span></div>
+          <label class="switch" title="Ativar ou desativar a interpretação por LLM">
+            <input id="llm-toggle" type="checkbox" role="switch">
+            <span></span>
+          </label>
+        </div>
+        <p class="llm-note">No modo contínuo, a alteração vale para a próxima amostra. A memória permanece em disco mesmo quando a LLM está desligada.</p>
         <div class="button-stack">
           <button class="button primary" id="run-once">▶ Executar uma vez</button>
           <button class="button secondary" id="start-watch">◉ Iniciar modo contínuo</button>

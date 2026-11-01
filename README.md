@@ -65,6 +65,11 @@ acompanhar agentes e abrir relatórios. O carregador reconhece automaticamente
 separadores tabulação ou ponto e vírgula e cabeçalhos com `-Im(Z)`, `-Z''`, `Im(Z)`
 ou `Z''`, preservando corretamente a convenção de sinal indicada pelo cabeçalho.
 
+O interruptor **LLM local pelo Ollama** controla a interpretação tanto na execução
+única quanto no modo contínuo. Durante o monitoramento, uma mudança passa a valer
+antes da próxima amostra, sem reiniciar o processo. Quando desligada, a análise por
+regras continua funcionando normalmente.
+
 Execução manual no Windows:
 
 ```powershell
@@ -98,12 +103,36 @@ Monitoramento contínuo:
 python run_pipeline.py --input data/input --output output --watch
 ```
 
+Também é possível escolher explicitamente o uso da LLM pela linha de comando:
+
+```bash
+python run_pipeline.py --input data/input --output output --llm
+python run_pipeline.py --input data/input --output output --no-llm
+```
+
 Arquivos homônimos em subpastas recebem identificadores com o caminho relativo, como
 `celula_1__espectro`, impedindo sobrescrita de métricas e relatórios.
 
 Todos os JSONs, SVGs e HTMLs são gravados de forma atômica. O JSON consolidado e o
 rodapé do relatório incluem SHA-256 da entrada, timestamp, versões científicas e a
 configuração efetiva sem segredos.
+
+## Memória persistente do orquestrador
+
+O Ollama não mantém memória entre requisições por conta própria. O KAIRIS salva um
+histórico estruturado de cada amostra em `output/memory/kairis_memory.json`, contendo
+métricas, regras e a conclusão da LLM. O histórico completo permanece no arquivo,
+inclusive quando a LLM está desligada.
+
+Para preservar o desempenho de modelos pequenos, apenas uma janela recente é
+incluída em cada prompt. Ela é configurada por:
+
+- `llm_memory_enabled`: ativa ou desativa o uso e a gravação da memória;
+- `llm_memory_recent_records`: número máximo de execuções anteriores no prompt;
+- `llm_memory_max_prompt_chars`: limite de caracteres da memória enviada à LLM.
+
+A memória serve como contexto comparativo. As métricas da amostra atual continuam
+sendo a fonte primária e não são substituídas por conclusões anteriores.
 
 ## Relatórios offline
 

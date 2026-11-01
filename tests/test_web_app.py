@@ -41,6 +41,7 @@ class WebAppTest(unittest.TestCase):
         page = self.client.get("/")
         self.assertEqual(page.status_code, 200)
         self.assertIn(b"KAIRIS", page.data)
+        self.assertIn(b"llm-toggle", page.data)
         self.assertEqual(self.client.get("/health").get_json()["status"], "ok")
 
         started = self.client.post("/api/run")
@@ -100,6 +101,23 @@ class WebAppTest(unittest.TestCase):
             content_type="multipart/form-data",
         )
         self.assertEqual(rejected.status_code, 400)
+
+    def test_llm_switch_is_persistent_and_available_while_watching(self) -> None:
+        initial = self.client.get("/api/status").get_json()
+        self.assertFalse(initial["llm_enabled"])
+
+        enabled = self.client.post("/api/llm", json={"enabled": True})
+        self.assertEqual(enabled.status_code, 200)
+        self.assertTrue(enabled.get_json()["llm_enabled"])
+
+        watched = self.client.post("/api/watch/start").get_json()
+        self.assertTrue(watched["running"])
+        disabled = self.client.post("/api/llm", json={"enabled": False}).get_json()
+        self.assertFalse(disabled["llm_enabled"])
+        self.client.post("/api/stop")
+
+        control = json.loads((self.output_dir / "runtime_control.json").read_text(encoding="utf-8"))
+        self.assertIs(control["llm_enabled"], False)
 
 
 if __name__ == "__main__":

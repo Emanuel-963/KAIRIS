@@ -21,6 +21,7 @@ if __package__ in (None, ""):
     sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from core.report_builder import build_html_report, save_json
+from core.memory_store import KairisMemoryStore
 
 
 class Agent5_Orchestrator:
@@ -55,18 +56,46 @@ class Agent5_Orchestrator:
             "esc_G2_flags": a4["G2"]["flags"],
         }
         interpretations = self._interpret(summary)
-        llm_text = self._optional_llm(summary, interpretations)
+        provenance = self._provenance()
+        memory_enabled = bool(self.config.get("llm_memory_enabled", True))
+        memory_store = KairisMemoryStore(Path(output_dir) / "memory" / "kairis_memory.json")
+        memory_records = (
+            memory_store.prompt_records(
+                int(self.config.get("llm_memory_recent_records", 8)),
+                int(self.config.get("llm_memory_max_prompt_chars", 6000)),
+            )
+            if memory_enabled
+            else []
+        )
+        llm_text = self._optional_llm(summary, interpretations, memory_records)
         metrics_agents = {
             agent: {key: value for key, value in payload.items() if key != "figures"}
             for agent, payload in self.outputs.items()
         }
-        provenance = self._provenance()
-        metrics = {"sample": sample_name, "provenance": provenance, "summary": summary, "interpretation_rules": interpretations, "llm_interpretation": llm_text, "llm": self.llm_status, "agents": metrics_agents}
+        memory_total = None
+        if memory_enabled:
+            memory_total = memory_store.append(
+                {
+                    "sample": sample_name,
+                    "timestamp": provenance["execution_timestamp"],
+                    "input_sha256": provenance["input_sha256"],
+                    "summary": summary,
+                    "interpretation_rules": interpretations,
+                    "llm_interpretation": llm_text,
+                }
+            )
+        memory_status = {
+            "enabled": memory_enabled,
+            "records_used": len(memory_records),
+            "records_total": memory_total,
+            "path": str(memory_store.path.resolve()) if memory_enabled else None,
+        }
+        metrics = {"sample": sample_name, "provenance": provenance, "summary": summary, "interpretation_rules": interpretations, "llm_interpretation": llm_text, "llm": self.llm_status, "memory": memory_status, "agents": metrics_agents}
         metrics_path = Path(output_dir) / "metrics" / f"{sample_name}_metrics.json"
         report_path = Path(output_dir) / "reports" / f"{sample_name}_report.html"
         save_json(metrics_path, metrics)
         build_html_report(report_path, sample_name, self.config, self.outputs, summary, interpretations, llm_text, provenance)
-        return {"metrics": str(metrics_path.resolve()), "report": str(report_path.resolve()), "summary": summary, "interpretation_rules": interpretations, "llm": self.llm_status}
+        return {"metrics": str(metrics_path.resolve()), "report": str(report_path.resolve()), "summary": summary, "interpretation_rules": interpretations, "llm": self.llm_status, "memory": memory_status}
 
     @staticmethod
     def _sanitized_config(config: dict[str, Any]) -> dict[str, Any]:
@@ -154,7 +183,12 @@ class Agent5_Orchestrator:
             messages.append("O ESC G2 indica domínio difusivo no limite de baixa frequência.")
         return messages
 
-    def _optional_llm(self, summary: dict[str, Any], rules: list[str]) -> str | None:
+    def _optional_llm(
+        self,
+        summary: dict[str, Any],
+        rules: list[str],
+        memory_records: list[dict[str, Any]] | None = None,
+    ) -> str | None:
         if not bool(self.config.get("llm_enabled", False)):
             self.llm_status["status"] = "disabled"
             return None
@@ -162,7 +196,7 @@ class Agent5_Orchestrator:
         provider = str(self.config.get("llm_provider", "ollama")).strip().lower()
         if provider in {"ollama", "auto"}:
             try:
-                return self._ollama_interpretation(summary, rules)
+                return self._ollama_interpretation(summary, rules, memory_records)
             except Exception as error:
                 self.llm_status = {
                     "enabled": True,
@@ -192,7 +226,7 @@ class Agent5_Orchestrator:
             model = str(self.config.get("llm_model", "gpt-4o-mini"))
             response = OpenAI(api_key=api_key).responses.create(
                 model=model,
-                input=self._llm_prompt(summary, rules),
+                input=self._llm_prompt(summary, rules, memory_records),
             )
             text = response.output_text.strip()
             if not text:
@@ -211,20 +245,36 @@ class Agent5_Orchestrator:
             raise
 
     @staticmethod
-    def _llm_prompt(summary: dict[str, Any], rules: list[str]) -> str:
+    def _llm_prompt(
+        summary: dict[str, Any],
+        rules: list[str],
+        memory_records: list[dict[str, Any]] | None = None,
+    ) -> str:
         """Build the grounded KAIRIS interpretation prompt."""
         context_path = Path(__file__).resolve().parents[1] / "models" / "orchestrator_context.txt"
         context = context_path.read_text(encoding="utf-8")
         metrics = json.dumps(summary, ensure_ascii=False, indent=2)
         rule_text = "\n".join(f"- {rule}" for rule in rules)
+        memory_text = ""
+        if memory_records:
+            memory_text = (
+                "\n\nMemória KAIRIS de execuções anteriores (use apenas para "
+                "comparação contextual; não altere as métricas atuais):\n"
+                + json.dumps(memory_records, ensure_ascii=False, indent=2)
+            )
         return (
             f"{context}\n\nMétricas KAIRIS:\n{metrics}\n\n"
-            f"Interpretação determinística:\n{rule_text}\n\n"
+            f"Interpretação determinística:\n{rule_text}{memory_text}\n\n"
             "Produza um único parágrafo objetivo em português, sem extrapolar "
             "os dados e sem sugerir diagnóstico clínico ou mecanismo não medido."
         )
 
-    def _ollama_interpretation(self, summary: dict[str, Any], rules: list[str]) -> str:
+    def _ollama_interpretation(
+        self,
+        summary: dict[str, Any],
+        rules: list[str],
+        memory_records: list[dict[str, Any]] | None = None,
+    ) -> str:
         """Use a running local Ollama service and an already installed model."""
         base_url = str(self.config.get("ollama_base_url", "http://127.0.0.1:11434")).rstrip("/")
         timeout = float(self.config.get("ollama_timeout_seconds", 120))
@@ -241,7 +291,7 @@ class Agent5_Orchestrator:
         model = self._select_ollama_model(preferred, models)
         payload = {
             "model": model,
-            "prompt": self._llm_prompt(summary, rules),
+            "prompt": self._llm_prompt(summary, rules, memory_records),
             "stream": False,
             "think": bool(self.config.get("ollama_think", False)),
             "options": {

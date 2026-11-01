@@ -62,3 +62,13 @@ def test_ollama_failure_falls_back_to_rules(monkeypatch):
     assert orchestrator._optional_llm(SUMMARY, RULES) is None
     assert orchestrator.llm_status["provider"] == "ollama"
     assert orchestrator.llm_status["status"] == "unavailable"
+
+
+def test_prompt_contains_bounded_persistent_memory():
+    memory = [{"sample": "anterior", "llm_interpretation": "Conclusão anterior."}]
+
+    prompt = _orchestrator()._llm_prompt(SUMMARY, RULES, memory)
+
+    assert "Memória KAIRIS de execuções anteriores" in prompt
+    assert "Conclusão anterior" in prompt
+    assert "não altere as métricas atuais" in prompt

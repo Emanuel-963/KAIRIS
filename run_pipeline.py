@@ -21,6 +21,7 @@ from agents.agent4_esc import Agent4_ESC
 from agents.agent5_orchestrator import Agent5_Orchestrator
 from core.config_loader import load_config
 from core.config_validator import validate_config
+from core.runtime_control import read_llm_enabled
 
 
 LOGGER = logging.getLogger("kairis")
@@ -101,21 +102,43 @@ def sample_identifier(path: Path, input_dir: Path) -> str:
     return identifier or "sample"
 
 
-def process_file(path: Path, input_dir: Path, output_dir: Path, config: dict[str, Any], overwrite: bool = False) -> bool:
+def process_file(
+    path: Path,
+    input_dir: Path,
+    output_dir: Path,
+    config: dict[str, Any],
+    overwrite: bool = False,
+    llm_control_path: Path | None = None,
+) -> bool:
     sample_name = sample_identifier(path, input_dir)
     consolidated = output_dir / "metrics" / f"{sample_name}_metrics.json"
     if consolidated.is_file() and not overwrite:
         LOGGER.info("Amostra já processada, ignorada sem --overwrite: %s", sample_name)
         return True
     try:
-        run_sample(path, output_dir, config, sample_name)
+        effective_config = dict(config)
+        effective_config["llm_enabled"] = read_llm_enabled(
+            llm_control_path, bool(config.get("llm_enabled", False))
+        )
+        LOGGER.info(
+            "LLM %s para a amostra %s",
+            "ativada" if effective_config["llm_enabled"] else "desativada",
+            sample_name,
+        )
+        run_sample(path, output_dir, effective_config, sample_name)
         return True
     except Exception:
         LOGGER.exception("Falha na amostra %s; as demais amostras continuarão", path)
         return False
 
 
-def process_existing(input_dir: Path, output_dir: Path, config: dict[str, Any], overwrite: bool = False) -> set[Path]:
+def process_existing(
+    input_dir: Path,
+    output_dir: Path,
+    config: dict[str, Any],
+    overwrite: bool = False,
+    llm_control_path: Path | None = None,
+) -> set[Path]:
     files = sorted(
         path.resolve()
         for path in input_dir.rglob("*")
@@ -124,12 +147,19 @@ def process_existing(input_dir: Path, output_dir: Path, config: dict[str, Any], 
     LOGGER.info("Encontrados %d arquivo(s) EIS", len(files))
     processed: set[Path] = set()
     for path in files:
-        if process_file(path, input_dir, output_dir, config, overwrite):
+        if process_file(path, input_dir, output_dir, config, overwrite, llm_control_path):
             processed.add(path)
     return processed
 
 
-def watch_directory(input_dir: Path, output_dir: Path, config: dict[str, Any], processed: set[Path], overwrite: bool = False) -> None:
+def watch_directory(
+    input_dir: Path,
+    output_dir: Path,
+    config: dict[str, Any],
+    processed: set[Path],
+    overwrite: bool = False,
+    llm_control_path: Path | None = None,
+) -> None:
     try:
         from watchdog.events import FileSystemEventHandler
         from watchdog.observers import Observer
@@ -174,7 +204,7 @@ def watch_directory(input_dir: Path, output_dir: Path, config: dict[str, Any], p
             if signatures.get(path) == stable_signature and path in processed:
                 continue
             signatures[path] = stable_signature
-            if process_file(path, input_dir, output_dir, config, overwrite):
+            if process_file(path, input_dir, output_dir, config, overwrite, llm_control_path):
                 processed.add(path)
     except KeyboardInterrupt:
         LOGGER.info("Monitoramento encerrado pelo usuário")
@@ -189,6 +219,15 @@ def main() -> int:
     parser.add_argument("--output", default=str(project_dir / "output"), help="Diretório de resultados")
     parser.add_argument("--config", default=str(project_dir / "config" / "protocol_config.json"), help="Arquivo JSON de configuração")
     parser.add_argument("--watch", action="store_true", help="Monitorar continuamente novos arquivos")
+    llm_group = parser.add_mutually_exclusive_group()
+    llm_group.add_argument("--llm", dest="llm_enabled", action="store_true", help="Ativar a interpretação por LLM nesta execução")
+    llm_group.add_argument("--no-llm", dest="llm_enabled", action="store_false", help="Desativar a LLM e usar somente as regras")
+    parser.set_defaults(llm_enabled=None)
+    parser.add_argument(
+        "--llm-control",
+        type=Path,
+        help="Arquivo de controle em tempo real; quando usado, é relido antes de cada amostra",
+    )
     parser.add_argument(
         "--overwrite",
         action="store_true",
@@ -199,10 +238,13 @@ def main() -> int:
     input_dir = Path(args.input).expanduser().resolve(); output_dir = Path(args.output).expanduser().resolve()
     input_dir.mkdir(parents=True, exist_ok=True); ensure_output_structure(output_dir); configure_logging(output_dir)
     config = load_config(args.config)
+    if args.llm_enabled is not None:
+        config["llm_enabled"] = args.llm_enabled
     validate_config(config)
-    processed = process_existing(input_dir, output_dir, config, args.overwrite)
+    llm_control_path = args.llm_control.expanduser().resolve() if args.llm_control else None
+    processed = process_existing(input_dir, output_dir, config, args.overwrite, llm_control_path)
     if args.watch:
-        watch_directory(input_dir, output_dir, config, processed, args.overwrite)
+        watch_directory(input_dir, output_dir, config, processed, args.overwrite, llm_control_path)
     else:
         LOGGER.info("Pipeline concluído")
     return 0

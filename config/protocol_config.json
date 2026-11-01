@@ -45,6 +45,9 @@
     "ram_16gb_plus": "qwen3:4b-instruct-2507-q4_K_M"
   },
   "llm_fallback_rules_only": true,
+  "llm_memory_enabled": true,
+  "llm_memory_recent_records": 8,
+  "llm_memory_max_prompt_chars": 6000,
   "report_d3_inline": false,
   "_reserved_not_yet_implemented": {
     "_comment": "Parâmetros planejados, preservados para compatibilidade, mas sem efeito nesta versão do KAIRIS.",

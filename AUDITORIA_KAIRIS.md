@@ -31,7 +31,7 @@ Agente 5 — síntese por regras, LLM opcional e relatório HTML
 - Os formatos de texto avaliados, incluindo variantes tabuladas, separadas por ponto e vírgula, com vírgula decimal e cabeçalhos alternativos, são reconhecidos.
 - A saída usa identificadores derivados do caminho relativo, evitando colisão entre arquivos homônimos em subpastas.
 - O modo sem LLM é completo; Ollama e OpenAI são complementos opcionais do Agente 5.
-- Os 25 testes automatizados existentes passaram após as correções registradas nesta auditoria.
+- Os 29 testes automatizados existentes passaram após as correções registradas nesta auditoria.
 - A verificação de pré-requisitos passou em Windows com Python 3.12.14, 15,9 GB de RAM, dependências Python disponíveis e Ollama detectado.
 - Existem 50 relatórios no diretório de saída no momento da auditoria. Esse total inclui execuções de validação além do lote científico e, portanto, não deve ser interpretado como número de amostras únicas.
 - O projeto possui repositório Git local inicializado para rastreabilidade das versões.
@@ -450,7 +450,7 @@ As dependências diretas sem uso (`impedance`, `fpdf2` e `jinja2`) foram removid
 ### Resultado desta auditoria
 
 ```text
-25 passed in 10.24s
+29 passed
 ```
 
 O comando de pré-requisitos também concluiu com dependências OK.

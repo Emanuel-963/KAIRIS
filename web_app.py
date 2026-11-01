@@ -19,6 +19,9 @@ from typing import Any
 from flask import Flask, jsonify, render_template, request, send_from_directory
 from werkzeug.utils import secure_filename
 
+from core.config_loader import load_config
+from core.runtime_control import read_llm_enabled, write_llm_enabled
+
 
 PROJECT_DIR = Path(__file__).resolve().parent
 DEFAULT_INPUT = PROJECT_DIR / "data" / "input"
@@ -41,6 +44,10 @@ class PipelineManager:
         self.input_dir.mkdir(parents=True, exist_ok=True)
         for child in ("metrics", "figures", "reports"):
             (self.output_dir / child).mkdir(parents=True, exist_ok=True)
+        self.llm_control_path = self.output_dir / "runtime_control.json"
+        self._llm_default = bool(load_config(self.config_path).get("llm_enabled", False))
+        if not self.llm_control_path.is_file():
+            write_llm_enabled(self.llm_control_path, self._llm_default)
         self._lock = threading.RLock()
         self._process: subprocess.Popen[str] | None = None
         self._stream: Any = None
@@ -87,6 +94,8 @@ class PipelineManager:
                 str(self.output_dir),
                 "--config",
                 str(self.config_path),
+                "--llm-control",
+                str(self.llm_control_path),
             ]
             if mode == "watch":
                 command.append("--watch")
@@ -197,11 +206,18 @@ class PipelineManager:
                 "pid": self._process.pid if self._process is not None else None,
                 "started_at": self._started_at.isoformat() if self._started_at else None,
                 "exit_code": self._last_exit_code,
+                "llm_enabled": read_llm_enabled(self.llm_control_path, self._llm_default),
                 "progress": self._progress(log_text),
                 "log": "\n".join(lines[-250:]),
                 "input_files": self._input_files(),
                 "reports": self._reports(),
             }
+
+    def set_llm_enabled(self, enabled: bool) -> dict[str, Any]:
+        """Persist the switch; an active watch run sees it before its next sample."""
+        with self._lock:
+            write_llm_enabled(self.llm_control_path, enabled)
+            return self.status()
 
 
 def unique_destination(directory: Path, original_name: str) -> Path:
@@ -271,6 +287,14 @@ def create_app(
             return jsonify(manager.start("once"))
         except RuntimeError as error:
             return jsonify({"error": str(error)}), 409
+
+    @app.post("/api/llm")
+    def api_llm() -> Any:
+        payload = request.get_json(silent=True) or {}
+        enabled = payload.get("enabled")
+        if not isinstance(enabled, bool):
+            return jsonify({"error": "O campo booleano 'enabled' é obrigatório"}), 400
+        return jsonify(manager.set_llm_enabled(enabled))
 
     @app.post("/api/watch/start")
     def api_watch_start() -> Any:

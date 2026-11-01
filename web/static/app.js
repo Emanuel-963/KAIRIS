@@ -6,6 +6,7 @@ const elements = {
   pid: $("#runtime-pid"), start: $("#runtime-start"), exit: $("#runtime-exit"), progress: $("#progress-content"), pulse: $("#pulse-label"),
   inputs: $("#file-list"), inputCount: $("#input-count"), reports: $("#reports"), reportCount: $("#report-count"), log: $("#log-output"),
   form: $("#upload-form"), fileInput: $("#file-input"), selected: $("#selected-files"), dropzone: $("#dropzone"), toast: $("#toast"),
+  llmToggle: $("#llm-toggle"), llmState: $("#llm-state"),
   dialog: $("#report-dialog"), frame: $("#report-frame"), dialogTitle: $("#dialog-title"), openTab: $("#open-tab"),
 };
 let selectedFiles = [];
@@ -47,6 +48,7 @@ function renderStatus(state) {
   elements.mode.textContent = state.running ? (state.mode === "watch" ? "CONTÍNUO" : "EXECUÇÃO ÚNICA") : "INATIVO";
   elements.mode.classList.toggle("active", state.running); elements.pulse.textContent = state.running ? "Em atividade" : "Aguardando"; elements.pulse.classList.toggle("active", state.running);
   elements.run.disabled = state.running; elements.watch.disabled = state.running; elements.stop.disabled = !state.running;
+  elements.llmToggle.checked = Boolean(state.llm_enabled); elements.llmState.textContent = state.llm_enabled ? "Ativada · memória persistente" : "Desativada · somente regras";
   elements.pid.textContent = state.pid ?? "—"; elements.start.textContent = formatDate(state.started_at); elements.exit.textContent = state.running ? "—" : (state.exit_code ?? "—");
   renderInputs(state.input_files); renderProgress(state.progress); renderReports(state.reports);
   const nearBottom = elements.log.scrollHeight - elements.log.scrollTop - elements.log.clientHeight < 70;
@@ -60,12 +62,13 @@ async function action(url, success) { try { renderStatus(await api(url, { method
 elements.run.addEventListener("click", () => action("/api/run", "Execução KAIRIS iniciada."));
 elements.watch.addEventListener("click", () => action("/api/watch/start", "Monitoramento contínuo iniciado."));
 elements.stop.addEventListener("click", () => action("/api/stop", "Execução interrompida."));
+elements.llmToggle.addEventListener("change", async event => { const enabled=event.target.checked; try { const state=await api("/api/llm", { method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({enabled}) }); renderStatus(state); toast(`LLM ${enabled ? "ativada" : "desativada"}.`); } catch(error) { event.target.checked=!enabled; toast(error.message, true); } });
 $("#refresh").addEventListener("click", () => refresh(false));
 elements.fileInput.addEventListener("change", event => { selectedFiles = [...event.target.files]; elements.selected.textContent = selectedFiles.length ? selectedFiles.map(file => file.name).join(" · ") : "Nenhum arquivo selecionado."; });
 ["dragenter","dragover"].forEach(name => elements.dropzone.addEventListener(name, event => { event.preventDefault(); elements.dropzone.classList.add("dragging"); }));
 ["dragleave","drop"].forEach(name => elements.dropzone.addEventListener(name, event => { event.preventDefault(); elements.dropzone.classList.remove("dragging"); }));
-elements.dropzone.addEventListener("drop", event => { selectedFiles = [...event.dataTransfer.files].filter(file => file.name.toLowerCase().endsWith(".txt")); elements.selected.textContent = selectedFiles.length ? selectedFiles.map(file => file.name).join(" · ") : "Nenhum .txt válido."; });
-elements.form.addEventListener("submit", async event => { event.preventDefault(); if (!selectedFiles.length) return toast("Selecione ao menos um arquivo .txt.", true); const body = new FormData(); selectedFiles.forEach(file => body.append("files", file)); try { const result=await api("/api/upload", { method:"POST", body }); selectedFiles=[]; elements.fileInput.value=""; elements.selected.textContent="Nenhum arquivo selecionado."; renderStatus(result.status); toast(`${result.saved.length} arquivo(s) enviado(s).`); } catch(error) { toast(error.message, true); } });
+elements.dropzone.addEventListener("drop", event => { selectedFiles = [...event.dataTransfer.files].filter(file => [".txt", ".csv"].some(extension => file.name.toLowerCase().endsWith(extension))); elements.selected.textContent = selectedFiles.length ? selectedFiles.map(file => file.name).join(" · ") : "Nenhum TXT ou CSV válido."; });
+elements.form.addEventListener("submit", async event => { event.preventDefault(); if (!selectedFiles.length) return toast("Selecione ao menos um arquivo TXT ou CSV.", true); const body = new FormData(); selectedFiles.forEach(file => body.append("files", file)); try { const result=await api("/api/upload", { method:"POST", body }); selectedFiles=[]; elements.fileInput.value=""; elements.selected.textContent="Nenhum arquivo selecionado."; renderStatus(result.status); toast(`${result.saved.length} arquivo(s) enviado(s).`); } catch(error) { toast(error.message, true); } });
 elements.reports.addEventListener("click", event => { const button=event.target.closest(".open-report"); if (!button) return; elements.frame.src=button.dataset.url; elements.openTab.href=button.dataset.url; elements.dialogTitle.textContent=`Relatório KAIRIS · ${button.dataset.sample}`; elements.dialog.showModal(); });
 $("#close-dialog").addEventListener("click", () => { elements.dialog.close(); elements.frame.src="about:blank"; });
 elements.dialog.addEventListener("click", event => { if (event.target === elements.dialog) { elements.dialog.close(); elements.frame.src="about:blank"; } });
