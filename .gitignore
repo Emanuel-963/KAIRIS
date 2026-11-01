@@ -1,0 +1,16 @@
+.venv/
+.test_deps/
+.kairis_smoke/
+.agent_cli_test/
+.web_preview/
+.pip-tools-cache/
+.pytest_cache/
+.coverage
+htmlcov/
+__pycache__/
+*.py[cod]
+output/
+data/input/
+.env
+*.tmp
+

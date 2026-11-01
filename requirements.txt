@@ -1,0 +1,10 @@
+# Em produção, prefira: python -m pip install -r requirements.lock
+numpy>=1.24
+scipy>=1.10
+pandas>=2.0
+matplotlib>=3.7
+openai>=1.0
+watchdog>=3.0
+Flask>=3.0
+jsonschema>=4.0
+

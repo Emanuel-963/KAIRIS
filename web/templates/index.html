@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>KAIRIS · Painel local</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand-mark" aria-hidden="true"><span></span><span></span><span></span></div>
+    <div>
+      <p class="eyebrow">ESPECTROSCOPIA DE IMPEDÂNCIA</p>
+      <h1>KAIRIS</h1>
+    </div>
+    <div class="system-status" id="system-status"><span class="status-dot"></span><span>Conectando</span></div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div>
+        <p class="eyebrow">CENTRO DE OPERAÇÕES</p>
+        <h2>Do espectro bruto ao diagnóstico integrado.</h2>
+        <p>Envie arquivos EIS TXT ou CSV, acompanhe os cinco agentes e explore os relatórios interativos sem sair do navegador.</p>
+      </div>
+      <div class="hero-metric"><strong id="report-count">0</strong><span>relatórios disponíveis</span></div>
+    </section>
+
+    <section class="workspace-grid">
+      <article class="panel upload-panel">
+        <div class="panel-heading"><div><p class="step">01 · ENTRADA</p><h3>Arquivos EIS</h3></div><span class="count" id="input-count">0</span></div>
+        <form id="upload-form">
+          <label class="dropzone" id="dropzone" for="file-input">
+            <input id="file-input" name="files" type="file" accept=".txt,.csv,text/plain,text/csv" multiple hidden>
+            <span class="upload-icon">⇧</span>
+            <strong>Arraste arquivos EIS</strong>
+            <span>ou clique para selecionar arquivos .txt ou .csv</span>
+          </label>
+          <div class="selected-files" id="selected-files">Nenhum arquivo selecionado.</div>
+          <button class="button primary wide" type="submit">Enviar para o KAIRIS</button>
+        </form>
+        <div class="file-list" id="file-list"></div>
+      </article>
+
+      <article class="panel control-panel">
+        <div class="panel-heading"><div><p class="step">02 · EXECUÇÃO</p><h3>Controle do pipeline</h3></div><span class="mode-badge" id="mode-badge">INATIVO</span></div>
+        <div class="control-copy">A execução única processa a fila atual e encerra. O modo contínuo permanece observando novos arquivos.</div>
+        <div class="button-stack">
+          <button class="button primary" id="run-once">▶ Executar uma vez</button>
+          <button class="button secondary" id="start-watch">◉ Iniciar modo contínuo</button>
+          <button class="button danger" id="stop-run" disabled>■ Interromper execução</button>
+        </div>
+        <dl class="runtime-details">
+          <div><dt>PID</dt><dd id="runtime-pid">—</dd></div>
+          <div><dt>Início</dt><dd id="runtime-start">—</dd></div>
+          <div><dt>Saída</dt><dd id="runtime-exit">—</dd></div>
+        </dl>
+      </article>
+    </section>
+
+    <section class="panel progress-panel">
+      <div class="panel-heading"><div><p class="step">03 · PROCESSAMENTO</p><h3>Progresso dos agentes</h3></div><span class="pulse-label" id="pulse-label">Aguardando</span></div>
+      <div id="progress-content" class="empty-state">Inicie uma execução para acompanhar EIS → DRT → GSF → ESC → Relatório.</div>
+    </section>
+
+    <section class="panel reports-panel">
+      <div class="panel-heading"><div><p class="step">04 · RESULTADOS</p><h3>Relatórios interativos</h3></div><button class="button ghost" id="refresh">↻ Atualizar</button></div>
+      <div id="reports" class="report-grid"><div class="empty-state">Nenhum relatório gerado.</div></div>
+    </section>
+
+    <section class="panel log-panel">
+      <div class="panel-heading"><div><p class="step">TELEMETRIA</p><h3>Log da execução</h3></div><span class="live-chip">LIVE</span></div>
+      <pre id="log-output">Aguardando atividade do pipeline…</pre>
+    </section>
+  </main>
+
+  <dialog id="report-dialog">
+    <div class="dialog-bar"><strong id="dialog-title">Relatório KAIRIS</strong><div><a id="open-tab" target="_blank" rel="noopener">Abrir em nova aba</a><button id="close-dialog" aria-label="Fechar">×</button></div></div>
+    <iframe id="report-frame" title="Relatório KAIRIS"></iframe>
+  </dialog>
+  <div id="toast" role="status" aria-live="polite"></div>
+  <script src="{{ url_for('static', filename='app.js') }}" defer></script>
+</body>
+</html>
+

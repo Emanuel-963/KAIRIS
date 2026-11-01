@@ -1,0 +1,56 @@
+{
+  "protocol_name": "KAIRIS",
+  "btlab_encoding": "latin-1",
+  "btlab_decimal": ",",
+  "btlab_separator": "\t",
+  "smoothness_threshold_strict": 0.05,
+  "smoothness_threshold_permissive": 0.15,
+  "smoothness_min_points": 10,
+  "lin_kk_min_points": 10,
+  "lin_kk_mu_cutoff": 0.85,
+  "lin_kk_max_rc_elements": 50,
+  "lin_kk_add_capacitance": false,
+  "lin_kk_point_threshold_pct": 5.0,
+  "lin_kk_rmse_threshold_pct": 5.0,
+  "lin_kk_max_failure_pct": 10.0,
+  "drt_n_tau_points": 100,
+  "drt_peak_prominence_fraction": 0.05,
+  "gsf_phi": 1.618033988749895,
+  "gsf_window_alpha": 3,
+  "cell_area_cm2": 2.4544,
+  "electrode_distance_mm": 0.75,
+  "electrolyte_conductivity_S_per_m": {
+    "H2SO4_1M": 24.0,
+    "KCl_1M": 11.18,
+    "KOH_1M": 27.0,
+    "LiCl_WiS": 15.0,
+    "default": 10.0
+  },
+  "llm_enabled": true,
+  "llm_provider": "ollama",
+  "llm_model": "gpt-4o-mini",
+  "llm_api_key_env": "OPENAI_API_KEY",
+  "ollama_base_url": "http://127.0.0.1:11434",
+  "ollama_model": "gemma3:4b",
+  "ollama_autostart": true,
+  "ollama_startup_timeout_seconds": 15,
+  "ollama_timeout_seconds": 120,
+  "ollama_temperature": 0.1,
+  "ollama_context_tokens": 4096,
+  "ollama_max_output_tokens": 256,
+  "ollama_think": false,
+  "ollama_model_profiles": {
+    "ram_4gb": "gemma3:1b",
+    "ram_8gb": "qwen3:4b-instruct-2507-q4_K_M",
+    "ram_16gb_plus": "qwen3:4b-instruct-2507-q4_K_M"
+  },
+  "llm_fallback_rules_only": true,
+  "report_d3_inline": false,
+  "_reserved_not_yet_implemented": {
+    "_comment": "Parâmetros planejados, preservados para compatibilidade, mas sem efeito nesta versão do KAIRIS.",
+    "drt_lambda_method": "lcurve",
+    "report_format": "html",
+    "figures_dpi": 150
+  }
+}
+

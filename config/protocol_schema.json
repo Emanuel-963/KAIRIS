@@ -1,0 +1,80 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://kairis.local/schemas/protocol_config.json",
+  "title": "Configuração do protocolo KAIRIS",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "protocol_name", "btlab_encoding", "btlab_decimal", "btlab_separator",
+    "smoothness_threshold_strict", "smoothness_threshold_permissive", "smoothness_min_points",
+    "lin_kk_min_points", "lin_kk_mu_cutoff", "lin_kk_max_rc_elements", "lin_kk_add_capacitance",
+    "lin_kk_point_threshold_pct", "lin_kk_rmse_threshold_pct", "lin_kk_max_failure_pct",
+    "drt_n_tau_points", "drt_peak_prominence_fraction", "gsf_phi", "gsf_window_alpha",
+    "cell_area_cm2", "electrode_distance_mm", "electrolyte_conductivity_S_per_m",
+    "llm_enabled", "llm_provider", "llm_model", "llm_api_key_env", "ollama_base_url",
+    "ollama_model", "ollama_autostart", "ollama_startup_timeout_seconds", "ollama_timeout_seconds",
+    "ollama_temperature", "ollama_context_tokens", "ollama_max_output_tokens", "ollama_think",
+    "ollama_model_profiles", "llm_fallback_rules_only", "report_d3_inline",
+    "_reserved_not_yet_implemented"
+  ],
+  "properties": {
+    "protocol_name": {"const": "KAIRIS"},
+    "btlab_encoding": {"type": "string", "minLength": 1},
+    "btlab_decimal": {"type": "string", "enum": [".", ","]},
+    "btlab_separator": {"type": "string", "minLength": 1, "maxLength": 2},
+    "smoothness_threshold_strict": {"type": "number", "minimum": 0, "maximum": 1},
+    "smoothness_threshold_permissive": {"type": "number", "minimum": 0, "maximum": 1},
+    "smoothness_min_points": {"type": "integer", "minimum": 3},
+    "lin_kk_min_points": {"type": "integer", "minimum": 3},
+    "lin_kk_mu_cutoff": {"type": "number", "minimum": -10, "maximum": 1},
+    "lin_kk_max_rc_elements": {"type": "integer", "minimum": 3, "maximum": 500},
+    "lin_kk_add_capacitance": {"type": "boolean"},
+    "lin_kk_point_threshold_pct": {"type": "number", "exclusiveMinimum": 0, "maximum": 100},
+    "lin_kk_rmse_threshold_pct": {"type": "number", "exclusiveMinimum": 0, "maximum": 100},
+    "lin_kk_max_failure_pct": {"type": "number", "minimum": 0, "maximum": 100},
+    "drt_n_tau_points": {"type": "integer", "minimum": 3, "maximum": 10000},
+    "drt_peak_prominence_fraction": {"type": "number", "minimum": 0, "maximum": 1},
+    "gsf_phi": {"type": "number", "exclusiveMinimum": 0},
+    "gsf_window_alpha": {"type": "integer", "minimum": 1},
+    "cell_area_cm2": {"type": "number", "exclusiveMinimum": 0},
+    "electrode_distance_mm": {"type": "number", "exclusiveMinimum": 0},
+    "electrolyte_conductivity_S_per_m": {
+      "type": "object", "minProperties": 1,
+      "additionalProperties": {"type": "number", "exclusiveMinimum": 0}
+    },
+    "llm_enabled": {"type": "boolean"},
+    "llm_provider": {"type": "string", "enum": ["ollama", "openai", "auto"]},
+    "llm_model": {"type": "string", "minLength": 1},
+    "llm_api_key_env": {"type": "string", "minLength": 1},
+    "ollama_base_url": {"type": "string", "pattern": "^https?://"},
+    "ollama_model": {"type": "string", "minLength": 1},
+    "ollama_autostart": {"type": "boolean"},
+    "ollama_startup_timeout_seconds": {"type": "number", "exclusiveMinimum": 0, "maximum": 600},
+    "ollama_timeout_seconds": {"type": "number", "exclusiveMinimum": 0, "maximum": 3600},
+    "ollama_temperature": {"type": "number", "minimum": 0, "maximum": 2},
+    "ollama_context_tokens": {"type": "integer", "minimum": 128, "maximum": 1048576},
+    "ollama_max_output_tokens": {"type": "integer", "minimum": 1, "maximum": 65536},
+    "ollama_think": {"type": "boolean"},
+    "ollama_model_profiles": {
+      "type": "object", "additionalProperties": false,
+      "required": ["ram_4gb", "ram_8gb", "ram_16gb_plus"],
+      "properties": {
+        "ram_4gb": {"type": "string", "minLength": 1},
+        "ram_8gb": {"type": "string", "minLength": 1},
+        "ram_16gb_plus": {"type": "string", "minLength": 1}
+      }
+    },
+    "llm_fallback_rules_only": {"type": "boolean"},
+    "report_d3_inline": {"type": "boolean"},
+    "_reserved_not_yet_implemented": {
+      "type": "object", "additionalProperties": false,
+      "required": ["_comment", "drt_lambda_method", "report_format", "figures_dpi"],
+      "properties": {
+        "_comment": {"type": "string", "minLength": 1},
+        "drt_lambda_method": {"type": "string", "enum": ["lcurve"]},
+        "report_format": {"type": "string", "enum": ["html"]},
+        "figures_dpi": {"type": "integer", "minimum": 72, "maximum": 1200}
+      }
+    }
+  }
+}
