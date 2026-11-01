@@ -18,6 +18,7 @@ _COLUMN_ALIASES = {
         "freq/hz",
         "frequency(hz)",
         "frequency/hz",
+        "frequency_hz",
         "f(hz)",
     },
     "real": {
@@ -25,18 +26,21 @@ _COLUMN_ALIASES = {
         "re(z)(ohm)",
         "z'(ohm)",
         "zre(ohm)",
+        "real_ohm",
     },
     "negative_imaginary": {
         "-im(z)/ohm",
         "-im(z)(ohm)",
         "-z''(ohm)",
         "-zim(ohm)",
+        "negativeimaginary_ohm",
     },
     "imaginary": {
         "im(z)/ohm",
         "im(z)(ohm)",
         "z''(ohm)",
         "zim(ohm)",
+        "imag_ohm",
     },
 }
 
@@ -70,7 +74,7 @@ def _detect_layout(path: Path, config: dict[str, Any]) -> tuple[str, str, int]:
     configured_encoding = str(config.get("btlab_encoding", "latin-1"))
     encodings = list(dict.fromkeys(("utf-8-sig", "utf-8", configured_encoding, "latin-1")))
     configured_separator = str(config.get("btlab_separator", "\t"))
-    separators = list(dict.fromkeys((configured_separator, "\t", ";")))
+    separators = list(dict.fromkeys((configured_separator, "\t", ";", ",")))
 
     for encoding in encodings:
         try:

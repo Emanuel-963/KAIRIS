@@ -1,0 +1,14 @@
+{
+  "format": "KAIRIS-validation-evidence-v1",
+  "timestamp": "2026-11-01T21:15:24.645657+00:00",
+  "corpus": "C:\\Users\\eso41\\OneDrive\\Documentos\\Protocolo EDGE\\kairis_protocol\\data\\validation\\kairis_eis_validation_v1",
+  "files_total": 198,
+  "files_valid": 198,
+  "files_invalid": 0,
+  "pipeline_requested": true,
+  "pipeline_samples": 198,
+  "pipeline_completed": 198,
+  "pipeline_failed": 0,
+  "drt_gsf_disagreements_with_report": 129,
+  "llm_enabled": false
+}

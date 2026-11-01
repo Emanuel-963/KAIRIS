@@ -1,0 +1,14 @@
+{
+  "name": "KAIRIS EIS Validation Corpus",
+  "version": "1.0.0",
+  "generated_at": "2026-11-01T21:13:28.750382+00:00",
+  "deterministic_seed": 20261101,
+  "synthetic_spectra": 72,
+  "public_experimental_spectra": 54,
+  "published_synthetic_spectra": 72,
+  "total_spectra": 198,
+  "public_source_doi": "10.5281/zenodo.15422339",
+  "public_source_license": "CC BY 4.0",
+  "autoecm_source_doi": "10.1149/1945-7111/acd8fb",
+  "autoecm_source_license": "CC BY 4.0"
+}

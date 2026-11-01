@@ -56,6 +56,23 @@ def test_loads_semicolon_csv_with_signed_imaginary_column(tmp_path):
     np.testing.assert_allclose(result["imag"], [-0.0012065, 0.0022537])
 
 
+def test_loads_public_comma_csv_with_underscore_columns(tmp_path):
+    source = tmp_path / "zenodo_cell.csv"
+    source.write_text(
+        "Frequency_Hz,Real_Ohm,Imag_Ohm\n"
+        "10000,0.0144,0.0057\n"
+        "1000,0.0141,-0.0003\n"
+        "100,0.0167,-0.0013\n",
+        encoding="utf-8",
+    )
+
+    result = load_btlab(source, {"btlab_separator": "\t", "btlab_decimal": ","})
+
+    np.testing.assert_allclose(result["frequency"], [10000.0, 1000.0, 100.0])
+    np.testing.assert_allclose(result["real"], [0.0144, 0.0141, 0.0167])
+    np.testing.assert_allclose(result["imag"], [0.0057, -0.0003, -0.0013])
+
+
 def test_agent1_exposes_spectral_smoothness_names(tmp_path):
     source = tmp_path / "sample.txt"
     rows = ["freq/Hz\tRe(Z)/Ohm\t-Im(Z)/Ohm"]

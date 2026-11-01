@@ -1,0 +1,629 @@
+{
+  "created": "2025-05-27T12:22:58.559774+00:00",
+  "modified": "2025-05-27T12:23:00.984172+00:00",
+  "id": 15422339,
+  "conceptrecid": "15422338",
+  "doi": "10.5281/zenodo.15422339",
+  "conceptdoi": "10.5281/zenodo.15422338",
+  "doi_url": "https://doi.org/10.5281/zenodo.15422339",
+  "metadata": {
+    "title": "EIS data of 54 21700 cells",
+    "doi": "10.5281/zenodo.15422339",
+    "publication_date": "2025-05-26",
+    "description": "<h1>Scope</h1>\n<p>This dataset contains electrochemical impedance spectroscopy (EIS) data collected from a batch of 21700 cylindrical NMC811 lithium-ion cells at a state of charge (SoC) of 30%. The measurement was performed using a Keysight SL1007A Scienlab Battery Test System in galvanostatic mode.</p>\n<h1>Data</h1>\n<p>Each CSV file (IDXX.csv) contains the results of the EIS test performed on the battery cell with the corresponding indentifier IDXX (where XX spans 01 - 54).&nbsp;</p>\n<h1>RDF Metadata</h1>\n<table style=\"border-collapse: collapse; width: 100.025%;\"><colgroup><col style=\"width: 25.045%;\"><col style=\"width: 25.045%;\"><col style=\"width: 25.045%;\"><col style=\"width: 24.856%;\"></colgroup>\n<tbody>\n<tr>\n<td><strong>Filename</strong></td>\n<td><strong>Description</strong></td>\n<td><strong>Format</strong></td>\n<td><strong>Usage</strong></td>\n</tr>\n<tr>\n<td><a href=\"https://zenodo.org/records/15422339/files/keysight_eis_csvw_schema_0.1.0.json\">keysight_eis_csvw_schema_0.1.0.json</a></td>\n<td>Metadata describing the table schema of the tabular data using terms from the CSVW, DCAT, and BattINFO resources.&nbsp;</td>\n<td>JSON-LD</td>\n<td>Enables agents to understand the structure and meaning of the tabular data in the CSV files.&nbsp;</td>\n</tr>\n<tr>\n<td><a href=\"https://zenodo.org/records/15422339/files/metadata.jsonld\">metadata.jsonld</a></td>\n<td>Metadata describing the tests, cells, and results contained in this record.&nbsp;</td>\n<td>JSON-LD</td>\n<td>Enables integration into semantic web and FAIR data workflows.</td>\n</tr>\n<tr>\n<td><a href=\"https://zenodo.org/records/15422339/files/metadata.html\">metadata.html</a></td>\n<td>HTML page that embeds the JSON-LD metadata for machine agents</td>\n<td>&nbsp;HTML</td>\n<td>Helps web crawlers to find and process the metadata</td>\n</tr>\n</tbody>\n</table>",
+    "access_right": "open",
+    "creators": [
+      {
+        "name": "Moertelmaier, Manuel",
+        "affiliation": "Keysight Technologies (Austria)",
+        "orcid": "0000-0003-4239-9809"
+      },
+      {
+        "name": "Kasper, Manuel",
+        "affiliation": "Keysight Technologies (Austria)",
+        "orcid": "0000-0002-6143-2881"
+      },
+      {
+        "name": "Clark, Simon",
+        "affiliation": "SINTEF",
+        "orcid": "0000-0002-8758-6109"
+      }
+    ],
+    "version": "1.0.0",
+    "language": "eng",
+    "resource_type": {
+      "title": "Dataset",
+      "type": "dataset"
+    },
+    "license": {
+      "id": "cc-by-4.0"
+    },
+    "communities": [
+      {
+        "id": "101135486"
+      }
+    ],
+    "relations": {
+      "version": [
+        {
+          "index": 0,
+          "is_last": true,
+          "parent": {
+            "pid_type": "recid",
+            "pid_value": "15422338"
+          }
+        }
+      ]
+    }
+  },
+  "title": "EIS data of 54 21700 cells",
+  "links": {
+    "self": "https://zenodo.org/api/records/15422339",
+    "self_html": "https://zenodo.org/records/15422339",
+    "preview_html": "https://zenodo.org/records/15422339?preview=1",
+    "doi": "https://doi.org/10.5281/zenodo.15422339",
+    "self_doi": "https://doi.org/10.5281/zenodo.15422339",
+    "self_doi_html": "https://zenodo.org/doi/10.5281/zenodo.15422339",
+    "reserve_doi": "https://zenodo.org/api/records/15422339/draft/pids/doi",
+    "parent": "https://zenodo.org/api/records/15422338",
+    "parent_html": "https://zenodo.org/records/15422338",
+    "parent_doi": "https://doi.org/10.5281/zenodo.15422338",
+    "parent_doi_html": "https://zenodo.org/doi/10.5281/zenodo.15422338",
+    "self_iiif_manifest": "https://zenodo.org/api/iiif/record:15422339/manifest",
+    "self_iiif_sequence": "https://zenodo.org/api/iiif/record:15422339/sequence/default",
+    "files": "https://zenodo.org/api/records/15422339/files",
+    "media_files": "https://zenodo.org/api/records/15422339/media-files",
+    "latest": "https://zenodo.org/api/records/15422339/versions/latest",
+    "latest_html": "https://zenodo.org/records/15422339/latest",
+    "versions": "https://zenodo.org/api/records/15422339/versions",
+    "draft": "https://zenodo.org/api/records/15422339/draft",
+    "access_links": "https://zenodo.org/api/records/15422339/access/links",
+    "access_grants": "https://zenodo.org/api/records/15422339/access/grants",
+    "access_users": "https://zenodo.org/api/records/15422339/access/users",
+    "access_request": "https://zenodo.org/api/records/15422339/access/request",
+    "access": "https://zenodo.org/api/records/15422339/access",
+    "communities": "https://zenodo.org/api/records/15422339/communities",
+    "communities-suggestions": "https://zenodo.org/api/records/15422339/communities-suggestions",
+    "request_deletion": "https://zenodo.org/api/records/15422339/request-deletion",
+    "file_modification": "https://zenodo.org/api/records/15422339/file-modification",
+    "quota_increase": "https://zenodo.org/api/records/15422339/quota-increase",
+    "requests": "https://zenodo.org/api/records/15422339/requests"
+  },
+  "updated": "2025-05-27T12:23:00.984172+00:00",
+  "recid": "15422339",
+  "revision": 4,
+  "files": [
+    {
+      "id": "749bef78-d63e-4ede-9c88-7e00a746ce4a",
+      "key": "metadata.jsonld",
+      "size": 201934,
+      "checksum": "md5:1fb88f163508938f1d5e16a0dc3adc2a",
+      "links": {
+        "self": "https://zenodo.org/api/records/15422339/files/metadata.jsonld/content"
+      }
+    },
+    {
+      "id": "6f6ba42a-b2fd-4914-bb17-4524e176dcd5",
+      "key": "keysight_eis_csvw_schema_0.1.0.json",
+      "size": 3930,
+      "checksum": "md5:bf257ccc400aa790c1d5e07999fc7ebb",
+      "links": {
+        "self": "https://zenodo.org/api/records/15422339/files/keysight_eis_csvw_schema_0.1.0.json/content"
+      }
+    },
+    {
+      "id": "96da59ee-be18-48f0-9387-32405a467785",
+      "key": "metadata.html",
+      "size": 202452,
+      "checksum": "md5:2db2ff383f09bc4dbc8972d983a292ff",
+      "links": {
+        "self": "https://zenodo.org/api/records/15422339/files/metadata.html/content"
+      }
+    },
+    {
+      "id": "3635844c-7506-406a-ae91-8590ad2b6ea4",
+      "key": "ID15.csv",
+      "size": 2551,
+      "checksum": "md5:237f4441f149c8bcf1a918f9ff8d54d3",
+      "links": {
+        "self": "https://zenodo.org/api/records/15422339/files/ID15.csv/content"
+      }
+    },
+    {
+      "id": "4f18a947-f565-4160-accf-420ef134466c",
+      "key": "ID34.csv",
+      "size": 2557,
+      "checksum": "md5:6351c5b53bcd3058fbb4cc2e1b7d0f6b",
+      "links": {
+        "self": "https://zenodo.org/api/records/15422339/files/ID34.csv/content"
+      }
+    },
+    {
+      "id": "5c6b2481-866c-4cd0-a8c6-930343d1e869",
+      "key": "ID39.csv",
+      "size": 2556,
+      "checksum": "md5:ba159dc15e16cc01eff9f136c6e0f557",
+      "links": {
+        "self": "https://zenodo.org/api/records/15422339/files/ID39.csv/content"
+      }
+    },
+    {
+      "id": "edaab5d6-50d0-459b-9c73-18e9682c45d7",
+      "key": "ID44.csv",
+      "size": 2557,
+      "checksum": "md5:5f1e8058ab2f2ad2a48d4abd75bb92b1",
+      "links": {
+        "self": "https://zenodo.org/api/records/15422339/files/ID44.csv/content"
+      }
+    },
+    {
+      "id": "48b6434c-64e4-4b67-b03a-d1e44becad8f",
+      "key": "ID53.csv",
+      "size": 2551,
+      "checksum": "md5:7f595354369582cd35d64b92e22b4427",
+      "links": {
+        "self": "https://zenodo.org/api/records/15422339/files/ID53.csv/content"
+      }
+    },
+    {
+      "id": "49dc6b23-35c1-40e7-b953-152a20cc3b9c",
+      "key": "ID27.csv",
+      "size": 2560,
+      "checksum": "md5:2092e4be257c4b506bd1a8f4e4a1e4cc",
+      "links": {
+        "self": "https://zenodo.org/api/records/15422339/files/ID27.csv/content"
+      }
+    },
+    {
+      "id": "513bd97c-2980-4227-82f0-46b4182c8d9f",
+      "key": "ID31.csv",
+      "size": 2553,
+      "checksum": "md5:7e4af31652aa35e9f55f8161d5e2e55a",
+      "links": {
+        "self": "https://zenodo.org/api/records/15422339/files/ID31.csv/content"
+      }
+    },
+    {
+      "id": "076404fc-7146-4b62-87f0-5b69f8f7b651",
+      "key": "ID47.csv",
+      "size": 2557,
+      "checksum": "md5:16303c363acea5dd6823b1e94d36ce69",
+      "links": {
+        "self": "https://zenodo.org/api/records/15422339/files/ID47.csv/content"
+      }
+    },
+    {
+      "id": "4b62671f-f718-4bc1-8471-2e3f09a6ac65",
+      "key": "ID02.csv",
+      "size": 2556,
+      "checksum": "md5:8d1eaa1cf7912168028746259377dcca",
+      "links": {
+        "self": "https://zenodo.org/api/records/15422339/files/ID02.csv/content"
+      }
+    },
+    {
+      "id": "cab5d075-3801-4d88-985f-1661128b1df4",
+      "key": "ID09.csv",
+      "size": 2549,
+      "checksum": "md5:ef8fb6d9361ad44e66132340f9ed1007",
+      "links": {
+        "self": "https://zenodo.org/api/records/15422339/files/ID09.csv/content"
+      }
+    },
+    {
+      "id": "12d7c559-f6c5-48aa-a978-ecfb968fa872",
+      "key": "ID13.csv",
+      "size": 2558,
+      "checksum": "md5:d153b7cbcbf0a434970256b77af3b966",
+      "links": {
+        "self": "https://zenodo.org/api/records/15422339/files/ID13.csv/content"
+      }
+    },
+    {
+      "id": "343222ed-b8cd-44b1-82e8-343f938746fa",
+      "key": "ID29.csv",
+      "size": 2558,
+      "checksum": "md5:f8f59ca2d5ade46b9750a0a965e9b4aa",
+      "links": {
+        "self": "https://zenodo.org/api/records/15422339/files/ID29.csv/content"
+      }
+    },
+    {
+      "id": "3853c860-0233-4fe7-a075-67edf5c4b55f",
+      "key": "ID35.csv",
+      "size": 2551,
+      "checksum": "md5:968c3c5f9b9921c19dfb7a914b4e57bd",
+      "links": {
+        "self": "https://zenodo.org/api/records/15422339/files/ID35.csv/content"
+      }
+    },
+    {
+      "id": "d393bd56-0820-404f-ba24-c1e3574238af",
+      "key": "ID06.csv",
+      "size": 2557,
+      "checksum": "md5:758e11877ba016b17f2e6c139d59c5ab",
+      "links": {
+        "self": "https://zenodo.org/api/records/15422339/files/ID06.csv/content"
+      }
+    },
+    {
+      "id": "484f9876-48c9-4ab2-bc40-d6ff7b27eea3",
+      "key": "ID21.csv",
+      "size": 2557,
+      "checksum": "md5:ebdbf80d7850949839e5fc59f64092db",
+      "links": {
+        "self": "https://zenodo.org/api/records/15422339/files/ID21.csv/content"
+      }
+    },
+    {
+      "id": "0d6ce4b1-2954-44c0-a92f-7548677b1a8c",
+      "key": "ID42.csv",
+      "size": 2552,
+      "checksum": "md5:aca42397da51aaac3de88b466cf80a63",
+      "links": {
+        "self": "https://zenodo.org/api/records/15422339/files/ID42.csv/content"
+      }
+    },
+    {
+      "id": "bbdb193a-1fea-4dcd-a755-9c5023073e71",
+      "key": "ID51.csv",
+      "size": 2557,
+      "checksum": "md5:d013494466209c5aa45ad6dad83d7206",
+      "links": {
+        "self": "https://zenodo.org/api/records/15422339/files/ID51.csv/content"
+      }
+    },
+    {
+      "id": "8d1e19b2-bf60-4583-b72a-41f2a1530e92",
+      "key": "ID49.csv",
+      "size": 2558,
+      "checksum": "md5:7fc2dc9d1dfb9f6a3af0965f0a238738",
+      "links": {
+        "self": "https://zenodo.org/api/records/15422339/files/ID49.csv/content"
+      }
+    },
+    {
+      "id": "55c7319b-d5c4-4275-8aa5-fb44eca02999",
+      "key": "ID26.csv",
+      "size": 2558,
+      "checksum": "md5:79db689c7665ac085bc40c7545b27564",
+      "links": {
+        "self": "https://zenodo.org/api/records/15422339/files/ID26.csv/content"
+      }
+    },
+    {
+      "id": "98dba6df-adae-4fdf-8787-afc7d18bccdf",
+      "key": "ID48.csv",
+      "size": 2561,
+      "checksum": "md5:b2354f1a4e05a45c86e000218c32c7f8",
+      "links": {
+        "self": "https://zenodo.org/api/records/15422339/files/ID48.csv/content"
+      }
+    },
+    {
+      "id": "84343d0a-1a4a-4c1a-b35c-4ba045abae6d",
+      "key": "ID04.csv",
+      "size": 2554,
+      "checksum": "md5:6ea5c169bfb961a361ae63243a0bca6e",
+      "links": {
+        "self": "https://zenodo.org/api/records/15422339/files/ID04.csv/content"
+      }
+    },
+    {
+      "id": "8f40cce1-f81e-4f03-bed8-2112f54a841b",
+      "key": "ID23.csv",
+      "size": 2557,
+      "checksum": "md5:7707d90705e1106f3abbe4515a0a2a01",
+      "links": {
+        "self": "https://zenodo.org/api/records/15422339/files/ID23.csv/content"
+      }
+    },
+    {
+      "id": "89bd82e8-a58f-470b-9ed3-e8a3adb8af17",
+      "key": "ID33.csv",
+      "size": 2558,
+      "checksum": "md5:2b8ed54ce56dbb1c81d01fd38e1e0564",
+      "links": {
+        "self": "https://zenodo.org/api/records/15422339/files/ID33.csv/content"
+      }
+    },
+    {
+      "id": "f40675ec-78e7-4531-93ca-05215bc331f2",
+      "key": "ID30.csv",
+      "size": 2553,
+      "checksum": "md5:4051ee8b1ffd68c353a87e30f3259087",
+      "links": {
+        "self": "https://zenodo.org/api/records/15422339/files/ID30.csv/content"
+      }
+    },
+    {
+      "id": "7d3b2740-69c7-4d65-971f-6c85ae16d1a6",
+      "key": "ID22.csv",
+      "size": 2553,
+      "checksum": "md5:a759554c86803bc755f82583db817901",
+      "links": {
+        "self": "https://zenodo.org/api/records/15422339/files/ID22.csv/content"
+      }
+    },
+    {
+      "id": "d74792bb-242a-46ee-826c-1eb29c2ff4ce",
+      "key": "ID01.csv",
+      "size": 2557,
+      "checksum": "md5:13ff29e7f0510a2453bcccacfb8afd0d",
+      "links": {
+        "self": "https://zenodo.org/api/records/15422339/files/ID01.csv/content"
+      }
+    },
+    {
+      "id": "17b5d056-19c9-4396-8190-d3ea17a3bbd7",
+      "key": "ID05.csv",
+      "size": 2554,
+      "checksum": "md5:8ef2c09b7bbf9fa70d9ef817ad2af8b8",
+      "links": {
+        "self": "https://zenodo.org/api/records/15422339/files/ID05.csv/content"
+      }
+    },
+    {
+      "id": "7ba0de20-0437-4149-9b94-83334622d293",
+      "key": "ID24.csv",
+      "size": 2552,
+      "checksum": "md5:b7649ba7d56e82158af18c9bba862c4d",
+      "links": {
+        "self": "https://zenodo.org/api/records/15422339/files/ID24.csv/content"
+      }
+    },
+    {
+      "id": "b9d36778-260d-4302-991c-43d80d159b7d",
+      "key": "ID32.csv",
+      "size": 2554,
+      "checksum": "md5:b5faf4a1e234ea084fbd4afb67240f46",
+      "links": {
+        "self": "https://zenodo.org/api/records/15422339/files/ID32.csv/content"
+      }
+    },
+    {
+      "id": "0846b86f-01bc-4c44-a7f0-f31e038c0776",
+      "key": "ID03.csv",
+      "size": 2556,
+      "checksum": "md5:8ca97223f9d34b4d4c1ce11f4edabf3d",
+      "links": {
+        "self": "https://zenodo.org/api/records/15422339/files/ID03.csv/content"
+      }
+    },
+    {
+      "id": "6ba2d695-45b5-4109-b29c-1171ee88c892",
+      "key": "ID18.csv",
+      "size": 2560,
+      "checksum": "md5:09f616693c203fdf73974a2fc28bda32",
+      "links": {
+        "self": "https://zenodo.org/api/records/15422339/files/ID18.csv/content"
+      }
+    },
+    {
+      "id": "e11081e6-1109-4ee6-8ea8-8214c09592cb",
+      "key": "ID20.csv",
+      "size": 2545,
+      "checksum": "md5:8143994445e968479480587eaa759452",
+      "links": {
+        "self": "https://zenodo.org/api/records/15422339/files/ID20.csv/content"
+      }
+    },
+    {
+      "id": "d9a7be94-175f-40f2-a4c8-2e1cae9f3ead",
+      "key": "ID07.csv",
+      "size": 2555,
+      "checksum": "md5:9c1f2be1d86490dbbe16cd8375d9b7c7",
+      "links": {
+        "self": "https://zenodo.org/api/records/15422339/files/ID07.csv/content"
+      }
+    },
+    {
+      "id": "bd5300df-4176-4532-9506-0b055f8698e6",
+      "key": "ID08.csv",
+      "size": 2553,
+      "checksum": "md5:f9180f617637c46368b0389a0596a97f",
+      "links": {
+        "self": "https://zenodo.org/api/records/15422339/files/ID08.csv/content"
+      }
+    },
+    {
+      "id": "d2ffc010-e8d0-4be0-93b7-563c4819ef79",
+      "key": "ID10.csv",
+      "size": 2549,
+      "checksum": "md5:66092a769318071db05053aca5404334",
+      "links": {
+        "self": "https://zenodo.org/api/records/15422339/files/ID10.csv/content"
+      }
+    },
+    {
+      "id": "b680b24a-144d-48e7-a676-9e19954a1061",
+      "key": "ID17.csv",
+      "size": 2559,
+      "checksum": "md5:b87cf5b9dad0303779ace320048a3d45",
+      "links": {
+        "self": "https://zenodo.org/api/records/15422339/files/ID17.csv/content"
+      }
+    },
+    {
+      "id": "2149049b-6055-4b1c-a369-083c5b7a870e",
+      "key": "ID11.csv",
+      "size": 2556,
+      "checksum": "md5:1dfa0235f9da9b879dc4a738da37ee01",
+      "links": {
+        "self": "https://zenodo.org/api/records/15422339/files/ID11.csv/content"
+      }
+    },
+    {
+      "id": "b383b0ec-e680-439e-aa81-61063c72773d",
+      "key": "ID14.csv",
+      "size": 2549,
+      "checksum": "md5:9135a19ff55520c058930adfbca93e89",
+      "links": {
+        "self": "https://zenodo.org/api/records/15422339/files/ID14.csv/content"
+      }
+    },
+    {
+      "id": "2127a8d3-df08-4954-88c3-aabe5c823235",
+      "key": "ID45.csv",
+      "size": 2556,
+      "checksum": "md5:cc501224207976931715801af42e3dd1",
+      "links": {
+        "self": "https://zenodo.org/api/records/15422339/files/ID45.csv/content"
+      }
+    },
+    {
+      "id": "0a8f06fc-3b80-41df-9dfb-2397e1b738fc",
+      "key": "ID50.csv",
+      "size": 2554,
+      "checksum": "md5:dc260d919d4b5f19524b6712aed1049e",
+      "links": {
+        "self": "https://zenodo.org/api/records/15422339/files/ID50.csv/content"
+      }
+    },
+    {
+      "id": "8da36aa0-a77e-49ed-af3f-eef9baccc7a4",
+      "key": "ID12.csv",
+      "size": 2553,
+      "checksum": "md5:a0442499ba3b77ba77c128a24383bf03",
+      "links": {
+        "self": "https://zenodo.org/api/records/15422339/files/ID12.csv/content"
+      }
+    },
+    {
+      "id": "c560f17a-5a13-4da1-8f94-1905e7519d92",
+      "key": "ID28.csv",
+      "size": 2554,
+      "checksum": "md5:7aae69ad50844e51f941c5f5150926bb",
+      "links": {
+        "self": "https://zenodo.org/api/records/15422339/files/ID28.csv/content"
+      }
+    },
+    {
+      "id": "eca1ad27-42aa-4659-9184-97fe317aaa1a",
+      "key": "ID36.csv",
+      "size": 2558,
+      "checksum": "md5:17fd165368139ae558a93272cf4026ba",
+      "links": {
+        "self": "https://zenodo.org/api/records/15422339/files/ID36.csv/content"
+      }
+    },
+    {
+      "id": "0558bee8-3dff-4604-8904-0bc580715c2e",
+      "key": "ID52.csv",
+      "size": 2557,
+      "checksum": "md5:d7164c21089c2f009ff52970f3787ce8",
+      "links": {
+        "self": "https://zenodo.org/api/records/15422339/files/ID52.csv/content"
+      }
+    },
+    {
+      "id": "628dff96-b0dc-4c98-81ac-9fb945a2954e",
+      "key": "ID16.csv",
+      "size": 2552,
+      "checksum": "md5:eab6b248db79a5ecb3c2603fd7fe7dcb",
+      "links": {
+        "self": "https://zenodo.org/api/records/15422339/files/ID16.csv/content"
+      }
+    },
+    {
+      "id": "c6c63dee-cb61-40e1-a59c-ee29f622b6ef",
+      "key": "ID19.csv",
+      "size": 2557,
+      "checksum": "md5:4655196a5cd91ab8ed9e4499d07b0856",
+      "links": {
+        "self": "https://zenodo.org/api/records/15422339/files/ID19.csv/content"
+      }
+    },
+    {
+      "id": "44f203f1-18d7-41e8-a540-6a215d5de450",
+      "key": "ID25.csv",
+      "size": 2552,
+      "checksum": "md5:d4eb7893230e7ce55dd04400496095b3",
+      "links": {
+        "self": "https://zenodo.org/api/records/15422339/files/ID25.csv/content"
+      }
+    },
+    {
+      "id": "776bbd58-56d3-454e-9425-58b6e6566038",
+      "key": "ID37.csv",
+      "size": 2557,
+      "checksum": "md5:29fbb06dad6efe052199e6d40ecc1fd3",
+      "links": {
+        "self": "https://zenodo.org/api/records/15422339/files/ID37.csv/content"
+      }
+    },
+    {
+      "id": "800cf110-e307-45f5-8249-5fa7abf22fd3",
+      "key": "ID38.csv",
+      "size": 2554,
+      "checksum": "md5:cb415117cf5e2dce6e9269e287d5b6d5",
+      "links": {
+        "self": "https://zenodo.org/api/records/15422339/files/ID38.csv/content"
+      }
+    },
+    {
+      "id": "f300062d-fa70-4539-a66e-1a66c1fae7c9",
+      "key": "ID40.csv",
+      "size": 2554,
+      "checksum": "md5:e0d9d31de5a2acc438e188d16965b833",
+      "links": {
+        "self": "https://zenodo.org/api/records/15422339/files/ID40.csv/content"
+      }
+    },
+    {
+      "id": "9e3f765e-c34a-4771-8d0a-9b174b577fe3",
+      "key": "ID41.csv",
+      "size": 2555,
+      "checksum": "md5:695dfe92fdb7d051b9714c9f9b5b1cd2",
+      "links": {
+        "self": "https://zenodo.org/api/records/15422339/files/ID41.csv/content"
+      }
+    },
+    {
+      "id": "636ba7ef-3207-4228-a2b1-5d943a931128",
+      "key": "ID43.csv",
+      "size": 2557,
+      "checksum": "md5:f9c4309b8f89094d059d5d8ac5995b20",
+      "links": {
+        "self": "https://zenodo.org/api/records/15422339/files/ID43.csv/content"
+      }
+    },
+    {
+      "id": "1bb83bbc-bfac-4ac6-bb0d-5665710d7926",
+      "key": "ID46.csv",
+      "size": 2548,
+      "checksum": "md5:a0506bc70e71c34fa8bd0ce98a3d6d9e",
+      "links": {
+        "self": "https://zenodo.org/api/records/15422339/files/ID46.csv/content"
+      }
+    },
+    {
+      "id": "ec61b55f-bdb0-4b86-989f-0327079be31b",
+      "key": "ID54.csv",
+      "size": 2560,
+      "checksum": "md5:d74e8c597a8051a901ed584a5e5c7693",
+      "links": {
+        "self": "https://zenodo.org/api/records/15422339/files/ID54.csv/content"
+      }
+    }
+  ],
+  "swh": {},
+  "owners": [
+    {
+      "id": "1317090"
+    }
+  ],
+  "status": "published",
+  "stats": {
+    "downloads": 20494,
+    "unique_downloads": 19049,
+    "views": 1795,
+    "unique_views": 1650,
+    "version_downloads": 20494,
+    "version_unique_downloads": 19049,
+    "version_unique_views": 1650,
+    "version_views": 1795
+  },
+  "state": "done",
+  "submitted": true
+}

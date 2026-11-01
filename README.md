@@ -191,6 +191,25 @@ O ajuste real dos pesos não é executado silenciosamente. Ele exige um modelo-b
 definido, ambiente separado com GPU e validação do dataset. Consulte
 [`TRAINING.md`](TRAINING.md) para o fluxo e as garantias adotadas.
 
+## Corpus amplo de validação EIS
+
+O projeto inclui o **KAIRIS EIS Validation Corpus v1** em
+`data/validation/kairis_eis_validation_v1`: 72 espectros sintéticos KAIRIS, 72
+espectros rotulados do AutoECM (45 treino + 27 holdout) e 54 espectros
+experimentais públicos, totalizando 198 entradas diretamente executáveis. As duas
+fontes publicadas são CC BY 4.0.
+O manifesto registra origem, licença, papel recomendado e SHA-256. Para auditar a
+leitura de todos os arquivos ou executar Agentes 1–5 sem LLM:
+
+```bash
+python scripts/validate_eis_corpus.py
+python scripts/validate_eis_corpus.py --full-pipeline
+```
+
+Consulte o README dentro do corpus antes de usar os dados para treinamento. Dados
+experimentais públicos são tratados como avaliação externa sem rótulo causal;
+interpretações da LLM só entram no dataset supervisionado após revisão humana.
+
 ## Relatórios offline
 
 O padrão carrega D3.js pelo CDN. Para gerar um HTML que também incorpore o D3, defina

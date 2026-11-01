@@ -1,0 +1,14 @@
+{
+  "title": "Machine Learning Benchmarks for the Classification of Equivalent Circuit Models from Electrochemical Impedance Spectra",
+  "doi": "10.1149/1945-7111/acd8fb",
+  "repository": "https://github.com/BatteryDEV/AutoECM",
+  "license": "CC BY 4.0",
+  "source_files": {
+    "train_data.csv": "90fa5216dc8a8f7949f2796a93ebcb4f69c868b5d5a59aac5b004a445fb0f804",
+    "test_data.csv": "b3401351b675a4d985eebfe99089c19f943bedcba0ed55a5704a39e015c3da5d"
+  },
+  "selection": {
+    "training": "first five rows of each of nine classes in train_data.csv",
+    "holdout": "first three rows of each of nine classes in test_data.csv"
+  }
+}
