@@ -14,7 +14,14 @@ if ! command -v python3 >/dev/null 2>&1; then
   confirm "Python não encontrado. Deseja instalá-lo pelo gerenciador do sistema?" || {
     echo "Python 3.10+ é necessário." >&2; exit 1;
   }
-  if command -v apt-get >/dev/null 2>&1; then
+  if [ "$(uname -s)" = "Darwin" ]; then
+    if command -v brew >/dev/null 2>&1; then
+      brew install python@3.12
+    else
+      echo "Homebrew não encontrado. Instale Python 3.10+ por https://www.python.org/downloads/macos/ ou instale o Homebrew e repita." >&2
+      exit 1
+    fi
+  elif command -v apt-get >/dev/null 2>&1; then
     sudo apt-get update
     sudo apt-get install -y python3 python3-venv python3-pip
   elif command -v dnf >/dev/null 2>&1; then
@@ -28,9 +35,12 @@ if ! command -v python3 >/dev/null 2>&1; then
   fi
 fi
 
-python3 -m venv .venv
+if ! python3 -m venv .venv; then
+  echo "Não foi possível criar o ambiente virtual. No Linux, instale o pacote python3-venv; no macOS, use uma distribuição Python com venv." >&2
+  exit 1
+fi
 . .venv/bin/activate
 python -m pip install --upgrade pip
-python -m pip install -r requirements.txt
-python setup_kairis.py "$@"
+python -m pip install -e .
+kairis-setup "$@"
 echo "KAIRIS configurado. Execute scripts/start_kairis.sh"

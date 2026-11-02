@@ -11,10 +11,11 @@ from pathlib import Path
 from typing import Any
 
 from core.artifact_io import atomic_write_bytes, atomic_write_text
+from core.runtime_paths import workspace_root
 
 
 D3_CDN_URL = "https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"
-D3_CACHE_PATH = Path(__file__).resolve().parents[1] / "web" / "static" / "d3.min.js"
+D3_CACHE_PATH = workspace_root() / "web" / "static" / "d3.min.js"
 
 
 def to_jsonable(value: Any) -> Any:

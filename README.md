@@ -22,7 +22,7 @@ Set-ExecutionPolicy -Scope Process Bypass
 
 Se Python não estiver instalado, o assistente oferece Python 3.12 pelo `winget`.
 
-### Linux
+### Linux e macOS
 
 ```bash
 chmod +x scripts/setup_kairis.sh scripts/start_kairis.sh
@@ -30,8 +30,21 @@ chmod +x scripts/setup_kairis.sh scripts/start_kairis.sh
 ./scripts/start_kairis.sh --no-open
 ```
 
-O instalador reconhece `apt`, `dnf`, `pacman` e `zypper`. Se Python estiver ausente,
-a instalação é oferecida antes de qualquer alteração no sistema.
+No Linux, o instalador reconhece `apt`, `dnf`, `pacman` e `zypper`. No macOS, usa
+o Python já instalado ou oferece `python@3.12` pelo Homebrew. Se o Homebrew não
+existir, exibe as instruções oficiais sem instalá-lo silenciosamente. Em qualquer
+sistema, a instalação é oferecida antes de qualquer alteração.
+
+O projeto também é um pacote Python instalável. Dentro do clone:
+
+```bash
+python -m pip install -e .
+kairis --help
+kairis-web --no-open
+```
+
+Os comandos instalados usam a pasta atual como área de trabalho quando executados
+fora de um clone. Defina `KAIRIS_WORKSPACE` para escolher outra pasta.
 
 ## Atualização automática segura
 
@@ -50,12 +63,12 @@ O atualizador:
 - registra o resultado em `output/update_status.json`;
 - registra o commit Git usado na proveniência de cada amostra.
 
-A instalação precisa ser um clone Git com o remoto `origin`. Este checkout ainda
-não possui a URL oficial configurada. Quando ela estiver disponível:
+A instalação precisa ser um clone Git com o remoto `origin`. Para obter o clone
+oficial já configurado:
 
 ```bash
-git remote add origin URL_OFICIAL_DO_REPOSITORIO
-git branch --set-upstream-to=origin/main main
+git clone https://github.com/Emanuel-963/KAIRIS.git
+cd KAIRIS
 ```
 
 Downloads por arquivo ZIP não contêm os metadados Git necessários para atualização.
@@ -114,7 +127,7 @@ Execução manual no Windows:
 .\.venv\Scripts\python.exe web_app.py
 ```
 
-Execução manual no Linux:
+Execução manual no Linux ou macOS:
 
 ```bash
 .venv/bin/python web_app.py --no-open

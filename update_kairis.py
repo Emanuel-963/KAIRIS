@@ -14,11 +14,12 @@ from typing import Any
 
 from core.artifact_io import atomic_write_text
 from core.config_loader import load_config
+from core.runtime_paths import PACKAGE_ROOT, default_config_path, workspace_root
 
 
-PROJECT_DIR = Path(__file__).resolve().parent
-DEFAULT_CONFIG = PROJECT_DIR / "config" / "protocol_config.json"
-DEFAULT_STATUS = PROJECT_DIR / "output" / "update_status.json"
+PROJECT_DIR = PACKAGE_ROOT
+DEFAULT_CONFIG = default_config_path()
+DEFAULT_STATUS = workspace_root() / "output" / "update_status.json"
 
 
 def _status(path: Path, state: str, **details: Any) -> None:

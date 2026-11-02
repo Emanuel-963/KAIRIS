@@ -20,14 +20,16 @@ from flask import Flask, jsonify, render_template, request, send_from_directory
 from werkzeug.utils import secure_filename
 
 from core.config_loader import load_config
+from core.runtime_paths import PACKAGE_ROOT, default_config_path, workspace_root
 from core.runtime_control import read_llm_enabled, write_llm_enabled
 from core.training_feedback import TrainingFeedbackStore
 
 
-PROJECT_DIR = Path(__file__).resolve().parent
-DEFAULT_INPUT = PROJECT_DIR / "data" / "input"
-DEFAULT_OUTPUT = PROJECT_DIR / "output"
-DEFAULT_CONFIG = PROJECT_DIR / "config" / "protocol_config.json"
+PROJECT_DIR = PACKAGE_ROOT
+WORKSPACE_DIR = workspace_root()
+DEFAULT_INPUT = WORKSPACE_DIR / "data" / "input"
+DEFAULT_OUTPUT = WORKSPACE_DIR / "output"
+DEFAULT_CONFIG = default_config_path()
 STATUS_PATTERN = re.compile(
     r"AGENT_STATUS sample=(?P<sample>\S+) agent=(?P<agent>[1-5]) "
     r"state=(?P<state>running|complete|failed) label=(?P<label>\S+)"
@@ -90,7 +92,8 @@ class PipelineManager:
             self._stream = runner_log.open("a", encoding="utf-8")
             command = [
                 sys.executable,
-                str(PROJECT_DIR / "run_pipeline.py"),
+                "-m",
+                "run_pipeline",
                 "--input",
                 str(self.input_dir),
                 "--output",
@@ -105,7 +108,7 @@ class PipelineManager:
             creationflags = subprocess.CREATE_NO_WINDOW if os.name == "nt" else 0
             self._process = subprocess.Popen(
                 command,
-                cwd=PROJECT_DIR,
+                cwd=WORKSPACE_DIR,
                 stdout=self._stream,
                 stderr=subprocess.STDOUT,
                 text=True,
@@ -280,7 +283,11 @@ def create_app(
     output_dir: Path = DEFAULT_OUTPUT,
     config_path: Path = DEFAULT_CONFIG,
 ) -> Flask:
-    app = Flask(__name__, template_folder="web/templates", static_folder="web/static")
+    app = Flask(
+        __name__,
+        template_folder=str(PROJECT_DIR / "web" / "templates"),
+        static_folder=str(PROJECT_DIR / "web" / "static"),
+    )
     app.config["MAX_CONTENT_LENGTH"] = 256 * 1024 * 1024
     manager = PipelineManager(input_dir, output_dir, config_path)
     app.extensions["kairis_manager"] = manager

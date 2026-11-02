@@ -18,10 +18,11 @@ from typing import Any
 
 from core.artifact_io import atomic_write_text
 from core.config_loader import load_config
+from core.runtime_paths import PACKAGE_ROOT, default_config_path, local_config_path
 
 
-PROJECT_DIR = Path(__file__).resolve().parent
-DEFAULT_CONFIG = PROJECT_DIR / "config" / "protocol_config.json"
+PROJECT_DIR = PACKAGE_ROOT
+DEFAULT_CONFIG = default_config_path()
 DEPENDENCIES = ("numpy", "scipy", "pandas", "matplotlib", "flask", "watchdog")
 MODEL_ALTERNATIVES = {
     "ram_4gb": ("gemma3:1b", "qwen3:1.7b", "llama3.2:1b"),
@@ -125,7 +126,14 @@ def find_ollama() -> str | None:
     local_app_data = os.getenv("LOCALAPPDATA")
     if local_app_data:
         candidates.append(Path(local_app_data) / "Programs" / "Ollama" / "ollama.exe")
-    candidates.extend((Path("/usr/local/bin/ollama"), Path("/usr/bin/ollama")))
+    candidates.extend(
+        (
+            Path("/opt/homebrew/bin/ollama"),
+            Path("/usr/local/bin/ollama"),
+            Path("/usr/bin/ollama"),
+            Path("/Applications/Ollama.app/Contents/Resources/ollama"),
+        )
+    )
     for candidate in candidates:
         if candidate.is_file():
             return str(candidate)
@@ -252,7 +260,8 @@ def main() -> int:
     else:
         configure_ollama(config, memory_gb, args.yes, args.model)
     if config_path == DEFAULT_CONFIG.resolve():
-        destination = config_path.with_name("local_config.json")
+        destination = local_config_path()
+        destination.parent.mkdir(parents=True, exist_ok=True)
         local_keys = ("auto_update_enabled", "llm_enabled", "llm_provider", "ollama_model")
         local_config = {key: config[key] for key in local_keys if key in config}
     else:

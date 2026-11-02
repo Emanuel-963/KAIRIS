@@ -12,4 +12,4 @@ if [ "${1:-}" = "--no-update" ]; then
 else
   .venv/bin/python update_kairis.py
 fi
-exec .venv/bin/python web_app.py "$@"
+exec .venv/bin/kairis-web "$@"

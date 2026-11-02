@@ -3,3 +3,6 @@
 # platform-specific text conversion.
 data/validation/kairis_eis_validation_v1/**/*.csv -text
 data/validation/kairis_eis_validation_v1/**/*.txt -text
+
+# Launcher scripts must remain valid after a Windows checkout.
+*.sh text eol=lf

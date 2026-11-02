@@ -213,7 +213,9 @@ def watch_directory(
 
 
 def main() -> int:
-    project_dir = Path(__file__).resolve().parent
+    from core.runtime_paths import default_config_path, workspace_root
+
+    project_dir = workspace_root()
     parser = argparse.ArgumentParser(description="Pipeline científico KAIRIS")
     parser.add_argument(
         "--input",
@@ -221,7 +223,7 @@ def main() -> int:
         help="Arquivo EIS .txt/.csv ou diretório contendo amostras",
     )
     parser.add_argument("--output", default=str(project_dir / "output"), help="Diretório de resultados")
-    parser.add_argument("--config", default=str(project_dir / "config" / "protocol_config.json"), help="Arquivo JSON de configuração")
+    parser.add_argument("--config", default=str(default_config_path()), help="Arquivo JSON de configuração")
     parser.add_argument("--watch", action="store_true", help="Monitorar continuamente novos arquivos")
     llm_group = parser.add_mutually_exclusive_group()
     llm_group.add_argument("--llm", dest="llm_enabled", action="store_true", help="Ativar a interpretação por LLM nesta execução")
