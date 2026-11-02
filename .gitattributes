@@ -1,0 +1,5 @@
+# Validation spectra have byte-level SHA-256 provenance. Preserve their mixed
+# line endings exactly on every operating system instead of applying Git's
+# platform-specific text conversion.
+data/validation/kairis_eis_validation_v1/**/*.csv -text
+data/validation/kairis_eis_validation_v1/**/*.txt -text
