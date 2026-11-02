@@ -243,6 +243,19 @@ O segundo comando cria dados e figuras anonimizados em `reviewer/` e mantém a
 chave em `coordinator_only/`, que não deve ser entregue aos especialistas. O
 procedimento completo está em `paper/BLINDED_REVIEW_PROTOCOL_v1.md`.
 
+O benchmark controlado de robustez gera dados tabulares e uma figura SVG com
+resolução de processos, sensibilidade a ruído e efeito da frequência máxima:
+
+```bash
+python scripts/run_robustness_benchmark.py \
+  --destination output/robustness_benchmark_v1 \
+  --replicates 20
+```
+
+Cinco réplicas são suficientes para uma execução piloto; para resultados do
+artigo, use pelo menos 20 e registre a semente, o commit e o ambiente gravados no
+JSON do benchmark.
+
 ## Relatórios offline
 
 O padrão carrega D3.js pelo CDN. Para gerar um HTML que também incorpore o D3, defina

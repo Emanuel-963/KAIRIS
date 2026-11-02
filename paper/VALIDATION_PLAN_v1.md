@@ -93,6 +93,19 @@ forçadas a uma verdade de picos DRT. Seus resultados permanecem descritivos e s
 encaminhados à revisão humana cega. Como esta análise foi definida após inspeção
 do corpus, ela é retrospectiva e não cria novos critérios confirmatórios.
 
+### 5.4 Robustez e domínio operacional
+
+O script `scripts/run_robustness_benchmark.py` executa três experimentos
+controlados, com semente e réplicas registradas: separação logarítmica entre duas
+relaxações, ruído relativo e truncamento da frequência máxima. Os endpoints são
+taxa de recuperação dos processos, erro de localização de τ e erro relativo de
+R∞. O objetivo é estabelecer um domínio operacional e critérios de abstinência,
+não otimizar parâmetros por amostra.
+
+As curvas e limiares encontrados são específicos dos modelos sintéticos usados.
+Qualquer alteração do solver motivada por esses resultados exigirá nova versão do
+benchmark e deverá ser congelada antes da abertura das avaliações humanas.
+
 ## 6. Endpoints descritivos
 
 Serão relatados sem transformar automaticamente divergência em falha:
