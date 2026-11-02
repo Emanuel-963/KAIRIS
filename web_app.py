@@ -20,6 +20,7 @@ from flask import Flask, jsonify, render_template, request, send_from_directory
 from werkzeug.utils import secure_filename
 
 from core.config_loader import load_config
+from core.branding import FULL_NAME
 from core.runtime_paths import PACKAGE_ROOT, default_config_path, workspace_root
 from core.runtime_control import read_llm_enabled, write_llm_enabled
 from core.training_feedback import TrainingFeedbackStore
@@ -295,7 +296,7 @@ def create_app(
 
     @app.get("/")
     def dashboard() -> str:
-        return render_template("index.html")
+        return render_template("index.html", kairis_full_name=FULL_NAME)
 
     @app.get("/health")
     def health() -> Any:

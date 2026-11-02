@@ -11,6 +11,7 @@ from pathlib import Path
 from typing import Any
 
 from core.artifact_io import atomic_write_bytes, atomic_write_text
+from core.branding import FULL_NAME
 from core.runtime_paths import workspace_root
 
 
@@ -256,7 +257,7 @@ def build_html_report(
 
     document = f"""<!doctype html>
 <html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>KAIRIS — {html.escape(sample_name)}</title>
+<title>{html.escape(FULL_NAME)} — {html.escape(sample_name)}</title>
 {d3_script}
 <style>
 :root{{--ink:#172126;--muted:#5d7078;--accent:#11647a;--panel:#fff;--page:#eef3f4}}
@@ -274,7 +275,7 @@ table{{border-collapse:collapse;width:100%;margin:12px 0 20px}}th,td{{border:1px
 .diagnostic-badge:hover::after,.diagnostic-badge:focus::after{{content:attr(data-tooltip);position:absolute;z-index:30;left:0;top:calc(100% + .5rem);width:min(420px,75vw);padding:.65rem .75rem;border-radius:7px;background:#14272e;color:#fff;font-size:.78rem;font-weight:400;line-height:1.4;box-shadow:0 3px 14px #0005}}
 @media(max-width:600px){{main{{padding:10px}}.chart-grid{{grid-template-columns:1fr}}.chart-card{{padding:4px}}}}
 </style></head><body><main>
-<header><h1>Relatório KAIRIS: {html.escape(sample_name)}</h1><p class="lede">Gerado em {html.escape(generated)} · análise EIS sem circuito equivalente.</p></header>
+<header><h1>Relatório KAIRIS: {html.escape(sample_name)}</h1><p class="lede"><strong>{html.escape(FULL_NAME)}</strong><br>Gerado em {html.escape(generated)} · análise EIS sem circuito equivalente.</p></header>
 <section><h2>1. EIS bruto e Spectral Smoothness (local residue)</h2>
 <p><strong>Nota:</strong> Spectral Smoothness é um indicador de suavidade por resíduo local; não é uma validação integral de Kramers-Kronig.</p>{_table(agent1_metrics)}
 <div class="chart-grid"><article class="chart-card"><h3>Nyquist</h3><p class="zoom-hint">Role para zoom; arraste para navegar.</p><div id="nyquist" class="chart"></div></article>

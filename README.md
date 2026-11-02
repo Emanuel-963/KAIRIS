@@ -1,5 +1,7 @@
 # KAIRIS
 
+**Kramers–Kronig-Assessed Impedance, Relaxation, and Integrated Spectroscopy**
+
 Pipeline científico sem circuito equivalente para espectroscopia de impedância
 eletroquímica. O KAIRIS executa EIS → DRT → GSF → ESC e produz um relatório HTML
 interativo pelo navegador.

@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "kairis-protocol"
 version = "0.1.0"
-description = "Reproducible multiperspective electrochemical impedance spectroscopy pipeline"
+description = "Kramers–Kronig-Assessed Impedance, Relaxation, and Integrated Spectroscopy"
 readme = "README.md"
 requires-python = ">=3.10"
 license = { text = "BSD-3-Clause" }

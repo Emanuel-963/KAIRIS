@@ -1,5 +1,8 @@
 # Plano de validação científica do KAIRIS — versão 1
 
+**Nome oficial:** KAIRIS — Kramers–Kronig-Assessed Impedance, Relaxation, and
+Integrated Spectroscopy.
+
 **Estado:** rascunho para aprovação do pesquisador responsável  
 **Data de congelamento técnico:** 1 de novembro de 2026  
 **Versão do protocolo:** anterior à release candidata v1.0  
