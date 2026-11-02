@@ -106,6 +106,13 @@ As curvas e limiares encontrados são específicos dos modelos sintéticos usado
 Qualquer alteração do solver motivada por esses resultados exigirá nova versão do
 benchmark e deverá ser congelada antes da abertura das avaliações humanas.
 
+R∞ só será aceito quando os oito pontos de maior frequência satisfizerem
+simultaneamente fase absoluta no ponto máximo ≤7° e amplitude relativa do intervalo
+de Re(Z) ≤10%. Caso contrário, o valor bruto será mantido para auditoria, o valor
+aceito será nulo e o fallback ESC G4 será omitido. Esses limiares foram calibrados
+retrospectivamente no benchmark v1 e deverão ser reavaliados em dados externos;
+o escore de qualidade é uma margem heurística, não uma probabilidade.
+
 ## 6. Endpoints descritivos
 
 Serão relatados sem transformar automaticamente divergência em falha:

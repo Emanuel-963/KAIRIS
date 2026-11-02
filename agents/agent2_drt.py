@@ -59,6 +59,7 @@ class Agent2_DRT:
             self.config,
         )
         source_filename = self.source_filename or sample_name
+        r_inf_reliable = bool(result.get("R_inf_reliable", True))
         match = electrolyte_from_filename(
             source_filename,
             self.config.get("electrolyte_conductivity_S_per_m", {}),
@@ -67,12 +68,19 @@ class Agent2_DRT:
         z0_g4_source = "R_inf_fallback"
         electrolyte = None
         if match is None:
-            LOGGER.warning(
-                "%s: eletrolito nao identificado no nome %r; Z0_G4 usa R_inf=%.6g ohm",
-                sample_name,
-                source_filename,
-                z0_g4,
-            )
+            if r_inf_reliable:
+                LOGGER.warning(
+                    "%s: eletrolito nao identificado no nome %r; Z0_G4 usa R_inf=%.6g ohm",
+                    sample_name, source_filename, z0_g4,
+                )
+            else:
+                z0_g4 = None
+                z0_g4_source = "abstained_unreliable_R_inf"
+                LOGGER.warning(
+                    "%s: eletrolito nao identificado e R_inf sem plato de alta frequencia; "
+                    "KAIRIS abstém Z0_G4",
+                    sample_name,
+                )
         else:
             electrolyte, conductivity = match
             area_m2 = float(self.config.get("cell_area_cm2", 0.0)) * 1e-4
@@ -88,15 +96,30 @@ class Agent2_DRT:
                     conductivity,
                 )
             else:
-                LOGGER.warning(
-                    "%s: geometria ou condutividade invalida para %s; Z0_G4 usa R_inf=%.6g ohm",
-                    sample_name,
-                    electrolyte,
-                    z0_g4,
-                )
+                if r_inf_reliable:
+                    LOGGER.warning(
+                        "%s: geometria ou condutividade invalida para %s; Z0_G4 usa R_inf=%.6g ohm",
+                        sample_name, electrolyte, z0_g4,
+                    )
+                else:
+                    z0_g4 = None
+                    z0_g4_source = "abstained_unreliable_R_inf"
+                    LOGGER.warning(
+                        "%s: geometria/condutividade invalida e R_inf sem plato; "
+                        "KAIRIS abstém Z0_G4",
+                        sample_name,
+                    )
                 electrolyte = None
         output = {
             "R_inf": result["R_inf"],
+            "R_inf_accepted": result.get("R_inf_accepted", result["R_inf"]),
+            "R_inf_reliable": r_inf_reliable,
+            "R_inf_status": result.get("R_inf_status", "accepted"),
+            "R_inf_quality_score": result.get("R_inf_quality_score", 1.0),
+            "R_inf_hf_points_used": result.get("R_inf_hf_points_used"),
+            "R_inf_hf_phase_deg": result.get("R_inf_hf_phase_deg"),
+            "R_inf_hf_real_span_fraction": result.get("R_inf_hf_real_span_fraction"),
+            "R_inf_abstention_reasons": result.get("R_inf_abstention_reasons", []),
             "n_peaks": len(result["peaks"]),
             "peaks": [{key: value for key, value in peak.items() if not key.endswith("index")} for peak in result["peaks"]],
             "Z0_G1": result["Z0_G1"],
@@ -106,6 +129,7 @@ class Agent2_DRT:
             "Z0_G4": z0_g4,
             "Z0_G4_source": z0_g4_source,
             "Z0_G4_electrolyte": electrolyte,
+            "Z0_G4_reliable": z0_g4 is not None,
             "f_W": result["f_W"],
             "tau_W": result["tau_W"],
             "f_eq": result["f_eq"],

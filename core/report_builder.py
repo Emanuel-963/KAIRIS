@@ -92,6 +92,22 @@ def _diagnostic_badge(summary: dict[str, Any]) -> str:
     )
 
 
+def _r_inf_badge(summary: dict[str, Any]) -> str:
+    """Render an explicit warning when KAIRIS abstains from reporting R_inf."""
+    if summary.get("R_inf_status") != "abstained":
+        return ""
+    tooltip = (
+        "A região de alta frequência não atingiu os critérios configurados de fase "
+        "e platô de Re(Z). O valor bruto permanece na proveniência, mas R∞ não é "
+        "reportado como quantitativamente confiável."
+    )
+    escaped = html.escape(tooltip, quote=True)
+    return (
+        '<span class="diagnostic-badge warning-badge" tabindex="0" '
+        f'data-tooltip="{escaped}" title="{escaped}">R∞ Abstained</span>'
+    )
+
+
 def _inline_svg(path: str | Path) -> str:
     """Read a Matplotlib SVG as inline markup, without external file links."""
     content = Path(path).read_text(encoding="utf-8")
@@ -216,7 +232,7 @@ def build_html_report(
     chart_json = _safe_inline_json(_chart_payload(outputs))
     d3_script = _d3_script(config)
     provenance_html = _table(provenance or {})
-    diagnostic_badge = _diagnostic_badge(summary)
+    diagnostic_badge = _diagnostic_badge(summary) + _r_inf_badge(summary)
 
     document = f"""<!doctype html>
 <html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
@@ -233,6 +249,7 @@ table{{border-collapse:collapse;width:100%;margin:12px 0 20px}}th,td{{border:1px
 .point{{stroke:#fff;stroke-width:.7;cursor:crosshair}}.zoom-hint{{color:var(--muted);font-size:.82rem;margin:2px 8px 8px}}.tooltip{{position:fixed;display:none;z-index:20;pointer-events:none;background:#14272e;color:#fff;padding:8px 10px;border-radius:6px;font-size:12px;line-height:1.45;box-shadow:0 3px 14px #0005}}
 .static-grid{{display:grid;grid-template-columns:repeat(auto-fit,minmax(330px,1fr));gap:16px}}.static-svg{{margin:0;border:1px solid #d8e1e5;border-radius:10px;padding:8px}}.static-svg svg{{max-width:100%;height:auto}}figcaption{{text-align:center;color:var(--muted);font-size:.9rem}}
 .diagnostic-badge{{position:relative;display:inline-block;margin-left:.55rem;padding:.32rem .62rem;border-radius:999px;background:#6a3db8;color:#fff;font-size:.78rem;vertical-align:middle;cursor:help;letter-spacing:.01em}}
+.warning-badge{{background:#a13d2d}}
 .diagnostic-badge:hover::after,.diagnostic-badge:focus::after{{content:attr(data-tooltip);position:absolute;z-index:30;left:0;top:calc(100% + .5rem);width:min(420px,75vw);padding:.65rem .75rem;border-radius:7px;background:#14272e;color:#fff;font-size:.78rem;font-weight:400;line-height:1.4;box-shadow:0 3px 14px #0005}}
 @media(max-width:600px){{main{{padding:10px}}.chart-grid{{grid-template-columns:1fr}}.chart-card{{padding:4px}}}}
 </style></head><body><main>
@@ -310,7 +327,7 @@ const drtChart=xyChart("#drt",KAIRIS.drt,{{x:d=>d.tau,y:d=>d.gamma,xLog:true,xLa
 drtChart.plot.selectAll("circle.peak").data(KAIRIS.drt_peaks).join("circle").attr("class","peak").attr("r",6).attr("fill","#d7301f").attr("stroke","#fff").attr("cx",d=>drtChart.x(d.tau)).attr("cy",d=>drtChart.y(d.gamma_max)).on("pointermove",(event,d)=>showTip(event,`<strong>Pico DRT</strong><br>f: ${{fmt(d.f_char)}} Hz<br>τ: ${{fmt(d.tau)}} s<br>γ_max: ${{fmt(d.gamma_max)}} Ω<br>Área: ${{fmt(d.area)}} Ω`)).on("pointerleave",hideTip);
 const alphaValues=KAIRIS.q_map.map(d=>d.alpha).filter(Number.isFinite); const alphaExtent=d3.extent(alphaValues); const qDomain=alphaExtent[0]===alphaExtent[1]?[alphaExtent[0]-1,alphaExtent[1]+1]:alphaExtent; const qColor=d3.scaleSequential(d3.interpolateTurbo).domain(qDomain);
 xyChart("#q-map",KAIRIS.q_map,{{x:d=>d.x,y:d=>d.y,xLabel:"xₙ",yLabel:"yₙ",aria:"Mapa q interativo",radius:4.2,color:d=>Number.isFinite(d.alpha)?qColor(d.alpha):"#777",tip:d=>`${{frequencyTip(d)}}<br>xₙ: ${{fmt(d.x)}}<br>yₙ: ${{fmt(d.y)}}<br>q: ${{fmt(d.q)}}<br>α: ${{Number.isFinite(d.alpha)?fmt(d.alpha):"n/d"}}`}});
-for(const group of ["G1","G2","G3","G4"]) {{ const points=KAIRIS.esc[group]; const color=d3.scaleSequential(d3.interpolateViridis).domain(d3.extent(points,d=>Math.log10(d.frequency))); xyChart(`#esc-${{group.toLowerCase()}}`,points,{{x:d=>d.real,y:d=>d.imag,xLabel:"Re(Γ)",yLabel:"Im(Γ)",zoom:true,unitCircle:true,aria:`ESC ${{group}} interativo`,color:d=>color(Math.log10(d.frequency)),tip:d=>`${{frequencyTip(d)}}<br>Re(Γ): ${{fmt(d.real)}}<br>Im(Γ): ${{fmt(d.imag)}}<br>|Γ|: ${{fmt(d.magnitude)}}`}}); }}
+for(const group of ["G1","G2","G3","G4"]) {{ const points=KAIRIS.esc[group]; if(!points.length) {{ d3.select(`#esc-${{group.toLowerCase()}}`).append("p").attr("class","lede").text("KAIRIS absteve este grupo: impedância de referência sem confiabilidade suficiente."); continue; }} const color=d3.scaleSequential(d3.interpolateViridis).domain(d3.extent(points,d=>Math.log10(d.frequency))); xyChart(`#esc-${{group.toLowerCase()}}`,points,{{x:d=>d.real,y:d=>d.imag,xLabel:"Re(Γ)",yLabel:"Im(Γ)",zoom:true,unitCircle:true,aria:`ESC ${{group}} interativo`,color:d=>color(Math.log10(d.frequency)),tip:d=>`${{frequencyTip(d)}}<br>Re(Γ): ${{fmt(d.real)}}<br>Im(Γ): ${{fmt(d.imag)}}<br>|Γ|: ${{fmt(d.magnitude)}}`}}); }}
 </script></body></html>"""
     path = Path(destination)
     return atomic_write_text(path, document)

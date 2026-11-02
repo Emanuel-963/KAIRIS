@@ -256,6 +256,15 @@ Cinco réplicas são suficientes para uma execução piloto; para resultados do
 artigo, use pelo menos 20 e registre a semente, o commit e o ambiente gravados no
 JSON do benchmark.
 
+### Confiabilidade e abstenção de R∞
+
+O KAIRIS preserva `R_inf` como valor bruto auditável, mas só preenche
+`R_inf_accepted` quando a borda de alta frequência satisfaz os critérios
+configurados de fase e platô de Re(Z). Em caso de abstenção, a síntese e o HTML
+mostram um alerta, e o ESC G4 também se abstém se depender do fallback de R∞.
+Uma referência G4 obtida independentemente por geometria e condutividade continua
+válida. Os limiares ficam em `config/protocol_config.json`.
+
 ## Relatórios offline
 
 O padrão carrega D3.js pelo CDN. Para gerar um HTML que também incorpore o D3, defina

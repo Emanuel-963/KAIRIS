@@ -47,6 +47,56 @@ def _lcurve_index(residuals: np.ndarray, roughness: np.ndarray) -> int:
     return int(np.nanargmax(curvature))
 
 
+def assess_r_inf_quality(
+    frequency: np.ndarray,
+    real: np.ndarray,
+    imag: np.ndarray,
+    config: dict[str, Any],
+) -> dict[str, Any]:
+    """Assess whether the measured high-frequency edge supports reporting R_inf.
+
+    This is a local plateau indicator, not a probability or proof that the true
+    infinite-frequency intercept was reached. Thresholds are calibrated against
+    the KAIRIS retrospective robustness benchmark and remain configurable.
+    """
+    frequency = np.asarray(frequency, dtype=float)
+    real = np.asarray(real, dtype=float)
+    imag = np.asarray(imag, dtype=float)
+    order = np.argsort(frequency)[::-1]
+    real, imag = real[order], imag[order]
+    required = int(config.get("r_inf_hf_points", 8))
+    count = min(required, real.size)
+    max_phase = float(config.get("r_inf_max_phase_deg", 7.0))
+    max_span = float(config.get("r_inf_max_relative_span", 0.10))
+    reasons: list[str] = []
+    if count < required:
+        reasons.append("insufficient_high_frequency_points")
+    top_real = real[:count]
+    baseline = max(abs(float(np.median(top_real))), np.finfo(float).eps)
+    span = float((np.max(top_real) - np.min(top_real)) / baseline)
+    phase = float(abs(np.degrees(np.arctan2(imag[0], real[0]))))
+    if not np.isfinite(real[0]) or real[0] <= 0:
+        reasons.append("nonpositive_or_nonfinite_high_frequency_resistance")
+    if not np.isfinite(phase) or phase > max_phase:
+        reasons.append("high_frequency_phase_not_near_zero")
+    if not np.isfinite(span) or span > max_span:
+        reasons.append("high_frequency_real_part_not_plateaued")
+    enabled = bool(config.get("r_inf_quality_enabled", True))
+    reliable = not reasons if enabled else True
+    ratio = max(phase / max(max_phase, np.finfo(float).eps), span / max(max_span, np.finfo(float).eps))
+    score = float(np.clip(1.0 - ratio, 0.0, 1.0)) if enabled else 1.0
+    return {
+        "R_inf_reliable": bool(reliable),
+        "R_inf_status": "accepted" if reliable else "abstained",
+        "R_inf_accepted": float(real[0]) if reliable else None,
+        "R_inf_quality_score": score,
+        "R_inf_hf_points_used": count,
+        "R_inf_hf_phase_deg": phase,
+        "R_inf_hf_real_span_fraction": span,
+        "R_inf_abstention_reasons": reasons,
+    }
+
+
 def solve_drt(
     frequency: np.ndarray,
     real: np.ndarray,
@@ -67,6 +117,7 @@ def solve_drt(
     dlog_tau = np.gradient(log_tau)
 
     r_inf = float(np.real(z[0]))
+    r_inf_quality = assess_r_inf_quality(frequency, z.real, z.imag, config)
     target = z - r_inf
     kernel = 1.0 / (1.0 + 1j * omega[:, None] * tau[None, :])
     weighted_kernel = kernel * dlog_tau[None, :]
@@ -163,6 +214,7 @@ def solve_drt(
         "tau": tau,
         "gamma": gamma,
         "R_inf": r_inf,
+        **r_inf_quality,
         "peaks": peaks,
         "lambda_regularization": regularization,
         "Z0_G1": r_ct,

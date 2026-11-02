@@ -31,7 +31,7 @@ if str(PROJECT) not in sys.path:
 
 from core.artifact_io import atomic_binary_writer, atomic_write_text  # noqa: E402
 from core.config_validator import validate_config  # noqa: E402
-from core.drt_solver import solve_drt  # noqa: E402
+from core.drt_solver import assess_r_inf_quality, solve_drt  # noqa: E402
 from core.report_builder import to_jsonable  # noqa: E402
 from scripts.analyze_synthetic_recovery import match_relaxation_times  # noqa: E402
 
@@ -133,6 +133,7 @@ def _aggregate(records: list[dict[str, Any]]) -> list[dict[str, Any]]:
         rinf_errors = [float(row["r_inf_relative_error"]) for row in rows]
         recovered = sum(bool(row["recovered"]) for row in rows)
         exact = sum(bool(row["exact_peak_count"]) for row in rows)
+        reliable = sum(bool(row["r_inf_reliable"]) for row in rows)
         summary.append(
             {
                 "level": level,
@@ -140,6 +141,7 @@ def _aggregate(records: list[dict[str, Any]]) -> list[dict[str, Any]]:
                 "recovery_fraction": recovered / len(rows),
                 "recovery_wilson_ci95": _wilson_interval(recovered, len(rows)),
                 "exact_peak_count_fraction": exact / len(rows),
+                "r_inf_reliable_fraction": reliable / len(rows),
                 "tau_error_median": statistics.median(tau_errors),
                 "tau_error_q25_q75": [
                     float(value) for value in np.quantile(tau_errors, [0.25, 0.75])
@@ -180,6 +182,7 @@ def run_benchmark(
         for replicate in range(replicates):
             impedance = add_complex_noise(clean, 0.003, rng)
             result = solver(frequency, impedance.real, impedance.imag, config)
+            quality = assess_r_inf_quality(frequency, impedance.real, impedance.imag, config)
             observed = [float(peak["tau"]) for peak in result.get("peaks", [])]
             matches = match_relaxation_times(expected, observed)
             errors = [float(item["absolute_log10_error"]) for item in matches]
@@ -197,6 +200,8 @@ def run_benchmark(
                     if errors
                     else math.inf,
                     "r_inf_relative_error": abs(float(result["R_inf"]) - 0.2) / 0.2,
+                    "r_inf_reliable": quality["R_inf_reliable"],
+                    "r_inf_quality_score": quality["R_inf_quality_score"],
                 }
             )
 
@@ -207,6 +212,7 @@ def run_benchmark(
         for replicate in range(replicates):
             impedance = add_complex_noise(clean, noise, rng)
             result = solver(frequency, impedance.real, impedance.imag, config)
+            quality = assess_r_inf_quality(frequency, impedance.real, impedance.imag, config)
             observed = [float(peak["tau"]) for peak in result.get("peaks", [])]
             matches = match_relaxation_times([expected_tau], observed)
             error = float(matches[0]["absolute_log10_error"]) if matches else math.inf
@@ -221,6 +227,8 @@ def run_benchmark(
                     "exact_peak_count": len(observed) == 1,
                     "median_log10_tau_error": error,
                     "r_inf_relative_error": abs(float(result["R_inf"]) - 0.2) / 0.2,
+                    "r_inf_reliable": quality["R_inf_reliable"],
+                    "r_inf_quality_score": quality["R_inf_quality_score"],
                 }
             )
 
@@ -239,6 +247,9 @@ def run_benchmark(
             impedance = add_complex_noise(clean, 0.003, rng)
             observed_rinf = float(impedance.real[0])
             relative_error = abs(observed_rinf - 0.2) / 0.2
+            quality = assess_r_inf_quality(
+                local_frequency, impedance.real, impedance.imag, config
+            )
             records.append(
                 {
                     "experiment": "high_frequency_truncation",
@@ -250,6 +261,8 @@ def run_benchmark(
                     "exact_peak_count": False,
                     "median_log10_tau_error": 0.0,
                     "r_inf_relative_error": relative_error,
+                    "r_inf_reliable": quality["R_inf_reliable"],
+                    "r_inf_quality_score": quality["R_inf_quality_score"],
                 }
             )
 
@@ -257,6 +270,36 @@ def run_benchmark(
     summaries = {
         name: _aggregate([row for row in records if row["experiment"] == name])
         for name in names
+    }
+    truncation_rows = [
+        row for row in records if row["experiment"] == "high_frequency_truncation"
+    ]
+    true_positive = sum(
+        row["r_inf_reliable"] and row["r_inf_relative_error"] <= 0.05
+        for row in truncation_rows
+    )
+    false_positive = sum(
+        row["r_inf_reliable"] and row["r_inf_relative_error"] > 0.05
+        for row in truncation_rows
+    )
+    true_negative = sum(
+        not row["r_inf_reliable"] and row["r_inf_relative_error"] > 0.05
+        for row in truncation_rows
+    )
+    false_negative = sum(
+        not row["r_inf_reliable"] and row["r_inf_relative_error"] <= 0.05
+        for row in truncation_rows
+    )
+    calibration = {
+        "truth_definition": "absolute relative R_inf error <= 0.05",
+        "true_positive": true_positive,
+        "false_positive": false_positive,
+        "true_negative": true_negative,
+        "false_negative": false_negative,
+        "sensitivity": true_positive / max(true_positive + false_negative, 1),
+        "specificity": true_negative / max(true_negative + false_positive, 1),
+        "positive_predictive_value": true_positive / max(true_positive + false_positive, 1),
+        "negative_predictive_value": true_negative / max(true_negative + false_negative, 1),
     }
     return {
         "format": "KAIRIS-robustness-benchmark-v1",
@@ -274,6 +317,7 @@ def run_benchmark(
         "provenance": _provenance(config),
         "elapsed_seconds": time.perf_counter() - started,
         "summary": summaries,
+        "r_inf_indicator_calibration": calibration,
         "records": records,
     }
 
@@ -326,6 +370,15 @@ def _write_figure(result: dict[str, Any], path: Path) -> None:
         xlabel="Frequência máxima (Hz)", ylabel="Erro relativo de R∞",
         title="Truncamento em alta frequência",
     )
+    reliability_axis = axes[2].twinx()
+    reliability_axis.plot(
+        x,
+        [row["r_inf_reliable_fraction"] for row in truncation],
+        "s--",
+        color="#756bb1",
+        label="R∞ aceito",
+    )
+    reliability_axis.set(ylabel="Fração aceita", ylim=(-0.03, 1.03))
     fig.suptitle("KAIRIS — benchmark retrospectivo de robustez")
     with atomic_binary_writer(path) as handle:
         fig.savefig(handle, format="svg", metadata={"Title": "KAIRIS robustness benchmark v1"})
@@ -342,6 +395,7 @@ def write_outputs(result: dict[str, Any], destination: Path) -> None:
     fields = [
         "experiment", "level", "replicate", "expected_processes", "observed_peaks",
         "recovered", "exact_peak_count", "median_log10_tau_error", "r_inf_relative_error",
+        "r_inf_reliable", "r_inf_quality_score",
     ]
     stream = io.StringIO(newline="")
     writer = csv.DictWriter(stream, fieldnames=fields, lineterminator="\n")
@@ -356,6 +410,7 @@ def write_outputs(result: dict[str, Any], destination: Path) -> None:
     adequate = [row["level"] for row in truncation if row["r_inf_error_median"] <= 0.05]
     noise = result["summary"]["noise_sensitivity"]
     robust_noise = [row["level"] for row in noise if row["recovery_fraction"] >= 0.8]
+    calibration = result["r_inf_indicator_calibration"]
     lines = [
         "# KAIRIS — benchmark retrospectivo de robustez", "",
         "> Estudo de sensibilidade de desenvolvimento; não confirmatório.", "",
@@ -369,6 +424,9 @@ def write_outputs(result: dict[str, Any], destination: Path) -> None:
          if robust_noise else "- Nenhum nível de ruído atingiu recuperação ≥80%."),
         (f"- Menor fmax testado com erro mediano de R∞ ≤5%: {min(adequate):.0f} Hz"
          if adequate else "- Nenhum fmax atingiu erro mediano de R∞ ≤5%."),
+        f"- Indicador R∞ — sensibilidade: {calibration['sensitivity']:.1%}",
+        f"- Indicador R∞ — especificidade: {calibration['specificity']:.1%}",
+        f"- Indicador R∞ — valor preditivo positivo: {calibration['positive_predictive_value']:.1%}",
         "",
         "Os limiares descrevem este modelo controlado e não devem ser generalizados "
         "para todos os sistemas eletroquímicos.", "",

@@ -38,6 +38,18 @@ class Agent4_ESC:
         frequency, z = frequency[order], z[order]
         output: dict[str, Any] = {}
         for group_name, reference in self.references.items():
+            if reference is None:
+                output[group_name] = {
+                    "status": "abstained",
+                    "reason": "reference_impedance_unreliable",
+                    "Z0": None,
+                    "centroid": None,
+                    "gamma_mean": None,
+                    "lf_point": [None, None],
+                    "flags": ["reference_abstained"],
+                    "points": [],
+                }
+                continue
             group = calculate_group(z, reference)
             output[group_name] = {key: value for key, value in group.items() if key != "gamma"}
             output[group_name]["points"] = [

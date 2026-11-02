@@ -46,7 +46,14 @@ class Agent5_Orchestrator:
             "lin_kk_failure_pct": a1["lin_kk_failure_pct"],
             "morphology": a1["morphology_flag"],
             "n_drt_peaks": a2["n_peaks"],
-            "R_inf": a2["R_inf"],
+            "R_inf": a2.get("R_inf_accepted", a2["R_inf"]),
+            "R_inf_raw": a2["R_inf"],
+            "R_inf_status": a2.get("R_inf_status", "accepted"),
+            "R_inf_reliable": a2.get("R_inf_reliable", True),
+            "R_inf_quality_score": a2.get("R_inf_quality_score", 1.0),
+            "R_inf_hf_phase_deg": a2.get("R_inf_hf_phase_deg"),
+            "R_inf_hf_real_span_fraction": a2.get("R_inf_hf_real_span_fraction"),
+            "R_inf_abstention_reasons": a2.get("R_inf_abstention_reasons", []),
             "R_ct": a2["Z0_G1"],
             "regime_drt": a2["regime"],
             "alpha_mean": a3["alpha_mean"],
@@ -220,6 +227,17 @@ class Agent5_Orchestrator:
         else:
             messages.append(
                 "Atenção: o espectro não satisfez os critérios configurados da validação Lin-KK."
+            )
+        if summary.get("R_inf_status") == "abstained":
+            messages.append(
+                "Abstenção de R∞: a borda de alta frequência não apresenta platô "
+                "suficiente pelos critérios KAIRIS. O valor bruto é preservado apenas "
+                "para auditoria e não deve ser interpretado como intercepto confiável."
+            )
+        else:
+            messages.append(
+                "R∞ aceito pelo indicador local de platô em alta frequência; essa "
+                "aceitação não substitui extensão experimental da faixa de frequência."
             )
         drt = summary["regime_drt"]
         gsf = summary["regime_gsf"]
