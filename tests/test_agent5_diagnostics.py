@@ -1,5 +1,9 @@
 from agents.agent5_orchestrator import Agent5_Orchestrator
-from core.report_builder import _diagnostic_badge, _r_inf_badge
+from core.report_builder import (
+    _diagnostic_badge,
+    _r_inf_badge,
+    _r_inf_extrapolation_badge,
+)
 
 
 def test_intercalation_pseudocapacitive_has_priority_and_is_not_inconsistent():
@@ -49,3 +53,13 @@ def test_r_inf_abstention_is_explained_by_deterministic_rules():
     badge = _r_inf_badge(summary)
     assert "R∞ Abstained" in badge
     assert "não é reportado" in badge
+
+
+def test_secondary_r_inf_extrapolation_is_explicitly_caveated():
+    badge = _r_inf_extrapolation_badge(
+        {"R_inf_extrapolation_status": "accepted"}
+    )
+
+    assert "R∞ Extrapolated · Secondary" in badge
+    assert "Não substitui a observação direta" in badge
+    assert "não é usada no ESC G4" in badge

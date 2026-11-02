@@ -3,6 +3,7 @@ from __future__ import annotations
 import hashlib
 import json
 import shutil
+import sys
 from datetime import datetime
 from pathlib import Path
 
@@ -92,6 +93,36 @@ def test_runtime_llm_control_is_atomic_and_applied_per_sample(tmp_path, monkeypa
     assert run_pipeline.process_file(sample, input_dir, output_dir, {"llm_enabled": False}, llm_control_path=control)
     assert calls[0][2]["llm_enabled"] is True
     assert not (output_dir / "runtime_control.json.tmp").exists()
+
+
+def test_cli_accepts_a_single_eis_file(tmp_path, monkeypatch):
+    sample = tmp_path / "sample.csv"
+    sample.write_text("frequency,zreal,zimag\n1,2,-1\n", encoding="utf-8")
+    output_dir = tmp_path / "output"
+    calls = []
+    monkeypatch.setattr(run_pipeline, "load_config", lambda _path: {})
+    monkeypatch.setattr(run_pipeline, "validate_config", lambda _config: None)
+    monkeypatch.setattr(
+        run_pipeline,
+        "process_file",
+        lambda *args, **kwargs: calls.append((args, kwargs)) or True,
+    )
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "run_pipeline.py",
+            "--input",
+            str(sample),
+            "--output",
+            str(output_dir),
+            "--no-llm",
+        ],
+    )
+
+    assert run_pipeline.main() == 0
+    assert calls[0][0][0] == sample.resolve()
+    assert calls[0][0][1] == sample.parent.resolve()
 
 
 def test_memory_keeps_complete_history_but_bounds_prompt_context(tmp_path):

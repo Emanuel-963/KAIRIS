@@ -46,6 +46,11 @@ class Agent5_Orchestrator:
             "lin_kk_failure_pct": a1["lin_kk_failure_pct"],
             "morphology": a1["morphology_flag"],
             "n_drt_peaks": a2["n_peaks"],
+            "drt_resolution_status": a2.get("drt_resolution_status", "not_assessed"),
+            "drt_peak_count_reliable": a2.get("drt_peak_count_reliable", False),
+            "drt_min_peak_separation_decades": a2.get(
+                "drt_min_peak_separation_decades"
+            ),
             "R_inf": a2.get("R_inf_accepted", a2["R_inf"]),
             "R_inf_raw": a2["R_inf"],
             "R_inf_status": a2.get("R_inf_status", "accepted"),
@@ -54,6 +59,14 @@ class Agent5_Orchestrator:
             "R_inf_hf_phase_deg": a2.get("R_inf_hf_phase_deg"),
             "R_inf_hf_real_span_fraction": a2.get("R_inf_hf_real_span_fraction"),
             "R_inf_abstention_reasons": a2.get("R_inf_abstention_reasons", []),
+            "R_inf_extrapolation_status": a2.get(
+                "R_inf_extrapolation_status", "not_available"
+            ),
+            "R_inf_extrapolated_secondary": a2.get("R_inf_extrapolated"),
+            "R_inf_extrapolation_interval": a2.get("R_inf_extrapolation_interval"),
+            "R_inf_extrapolation_rmse_fraction": a2.get(
+                "R_inf_extrapolation_rmse_fraction"
+            ),
             "R_ct": a2["Z0_G1"],
             "regime_drt": a2["regime"],
             "alpha_mean": a3["alpha_mean"],
@@ -239,8 +252,35 @@ class Agent5_Orchestrator:
                 "R∞ aceito pelo indicador local de platô em alta frequência; essa "
                 "aceitação não substitui extensão experimental da faixa de frequência."
             )
+        if summary.get("R_inf_extrapolation_status") == "accepted":
+            messages.append(
+                "Uma extrapolação assintótica secundária de R∞ foi aceita por "
+                "estabilidade entre janelas. Ela deve ser relatada separadamente e "
+                "não substitui o endpoint primário nem alimenta o ESC G4."
+            )
+        elif summary.get("R_inf_extrapolation_status") == "abstained":
+            messages.append(
+                "A extrapolação secundária de R∞ também se absteve por falta de "
+                "ajuste ou estabilidade suficiente."
+            )
         drt = summary["regime_drt"]
         gsf = summary["regime_gsf"]
+        resolution = summary.get("drt_resolution_status")
+        if resolution == "unresolved_overlap":
+            messages.append(
+                "Os picos DRT detectados estão mais próximos que o limite de "
+                "resolução retrospectivo; a contagem de processos não é confiável."
+            )
+        elif resolution == "indeterminate_single_peak":
+            messages.append(
+                "Um único pico DRT foi detectado, mas processos sobrepostos não podem "
+                "ser excluídos; a contagem permanece indeterminada."
+            )
+        elif resolution == "resolved":
+            messages.append(
+                "Os picos DRT detectados excedem o limite retrospectivo de separação; "
+                "isso apoia resolução numérica, sem provar mecanismos distintos."
+            )
         if summary.get("diagnostic") == "intercalation_pseudocapacitive":
             messages.append(
                 "O DRT identifica processo difusivo dominante no domínio temporal, "

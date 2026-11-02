@@ -215,7 +215,11 @@ def watch_directory(
 def main() -> int:
     project_dir = Path(__file__).resolve().parent
     parser = argparse.ArgumentParser(description="Pipeline científico KAIRIS")
-    parser.add_argument("--input", default=str(project_dir / "data" / "input"), help="Diretório com arquivos EIS .txt ou .csv")
+    parser.add_argument(
+        "--input",
+        default=str(project_dir / "data" / "input"),
+        help="Arquivo EIS .txt/.csv ou diretório contendo amostras",
+    )
     parser.add_argument("--output", default=str(project_dir / "output"), help="Diretório de resultados")
     parser.add_argument("--config", default=str(project_dir / "config" / "protocol_config.json"), help="Arquivo JSON de configuração")
     parser.add_argument("--watch", action="store_true", help="Monitorar continuamente novos arquivos")
@@ -235,17 +239,35 @@ def main() -> int:
     )
     args = parser.parse_args()
 
-    input_dir = Path(args.input).expanduser().resolve(); output_dir = Path(args.output).expanduser().resolve()
-    input_dir.mkdir(parents=True, exist_ok=True); ensure_output_structure(output_dir); configure_logging(output_dir)
+    input_path = Path(args.input).expanduser().resolve(); output_dir = Path(args.output).expanduser().resolve()
+    if not input_path.exists():
+        if input_path.suffix.lower() in SUPPORTED_INPUT_SUFFIXES:
+            parser.error(f"arquivo de entrada não encontrado: {input_path}")
+        input_path.mkdir(parents=True, exist_ok=True)
+    ensure_output_structure(output_dir); configure_logging(output_dir)
     config = load_config(args.config)
     if args.llm_enabled is not None:
         config["llm_enabled"] = args.llm_enabled
     validate_config(config)
     llm_control_path = args.llm_control.expanduser().resolve() if args.llm_control else None
-    processed = process_existing(input_dir, output_dir, config, args.overwrite, llm_control_path)
-    if args.watch:
-        watch_directory(input_dir, output_dir, config, processed, args.overwrite, llm_control_path)
+    if input_path.is_file():
+        if input_path.suffix.lower() not in SUPPORTED_INPUT_SUFFIXES:
+            parser.error("--input deve ser um arquivo .txt/.csv ou um diretório")
+        if args.watch:
+            parser.error("--watch requer que --input seja um diretório")
+        process_file(
+            input_path,
+            input_path.parent,
+            output_dir,
+            config,
+            args.overwrite,
+            llm_control_path,
+        )
     else:
+        processed = process_existing(input_path, output_dir, config, args.overwrite, llm_control_path)
+        if args.watch:
+            watch_directory(input_path, output_dir, config, processed, args.overwrite, llm_control_path)
+    if not args.watch:
         LOGGER.info("Pipeline concluído")
     return 0
 

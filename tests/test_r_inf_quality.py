@@ -1,9 +1,11 @@
 from __future__ import annotations
 
 import numpy as np
+import pytest
 
 from agents.agent4_esc import Agent4_ESC
-from core.drt_solver import assess_r_inf_quality
+from core.drt_solver import assess_r_inf_quality, solve_drt
+from core.r_inf_estimator import extrapolate_r_inf
 from scripts.run_robustness_benchmark import zarc_from_tau
 
 
@@ -50,3 +52,52 @@ def test_esc_g4_is_explicitly_abstained_for_missing_reference(tmp_path):
     assert result["G4"]["status"] == "abstained"
     assert result["G4"]["points"] == []
     assert result["G4"]["flags"] == ["reference_abstained"]
+
+
+def test_secondary_extrapolation_recovers_simple_tail_without_replacing_primary():
+    frequency = np.logspace(np.log10(1e4), -2, 101)
+    omega = 2.0 * np.pi * frequency
+    impedance = 0.2 + zarc_from_tau(omega, 8.0, 1e-2, 0.85)
+    config = {
+        "r_inf_extrapolation_enabled": True,
+        "r_inf_extrapolation_points": 20,
+        "r_inf_extrapolation_min_points": 12,
+        "r_inf_extrapolation_max_rmse_fraction": 0.015,
+        "r_inf_extrapolation_max_window_spread_fraction": 0.2,
+    }
+    result = extrapolate_r_inf(frequency, impedance.real, impedance.imag, config)
+    assert result["R_inf_extrapolation_status"] == "accepted"
+    assert result["R_inf_extrapolated"] == pytest.approx(0.2, rel=0.05)
+    assert result["R_inf_extrapolation_interval_type"] == "nested_window_sensitivity_range"
+
+
+def test_secondary_extrapolation_abstains_for_unstable_multitail_fit():
+    frequency = np.logspace(6, -2, 101)
+    impedance = _triple_zarc(frequency)
+    config = {
+        "r_inf_extrapolation_enabled": True,
+        "r_inf_extrapolation_points": 20,
+        "r_inf_extrapolation_min_points": 12,
+        "r_inf_extrapolation_max_rmse_fraction": 0.015,
+        "r_inf_extrapolation_max_window_spread_fraction": 0.2,
+    }
+    result = extrapolate_r_inf(frequency, impedance.real, impedance.imag, config)
+    assert result["R_inf_extrapolation_status"] == "abstained"
+    assert result["R_inf_extrapolated"] is None
+
+
+def test_single_drt_peak_is_not_claimed_as_reliable_process_count():
+    frequency = np.logspace(5, -2, 81)
+    omega = 2.0 * np.pi * frequency
+    impedance = 0.2 + zarc_from_tau(omega, 8.0, 1e-2, 0.90)
+    config = {
+        "drt_n_tau_points": 80,
+        "drt_peak_prominence_fraction": 0.05,
+        "drt_min_resolved_separation_decades": 1.3,
+        "r_inf_quality_enabled": False,
+        "r_inf_extrapolation_enabled": False,
+    }
+    result = solve_drt(frequency, impedance.real, impedance.imag, config)
+    assert len(result["peaks"]) == 1
+    assert result["drt_resolution_status"] == "indeterminate_single_peak"
+    assert result["drt_peak_count_reliable"] is False

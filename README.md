@@ -265,6 +265,21 @@ mostram um alerta, e o ESC G4 também se abstém se depender do fallback de R∞
 Uma referência G4 obtida independentemente por geometria e condutividade continua
 válida. Os limiares ficam em `config/protocol_config.json`.
 
+Quando habilitada, a extrapolação secundária ajusta
+`R∞ + A(jω)^(-n)` em janelas aninhadas. Ela é exibida separadamente, nunca
+substitui `R_inf_accepted`, não alimenta G4 e fornece apenas uma faixa de
+sensibilidade à janela. A contagem DRT também é marcada como indeterminada para
+um pico isolado ou não resolvida quando picos detectados estão separados por
+menos de 1,3 década.
+
+Depois que dois especialistas preencherem formulários independentes, calcule a
+concordância sem abrir a chave cega:
+
+```bash
+python scripts/analyze_blinded_reviews.py reviewer_a.csv reviewer_b.csv \
+  --destination output/review_agreement_v1
+```
+
 ## Relatórios offline
 
 O padrão carrega D3.js pelo CDN. Para gerar um HTML que também incorpore o D3, defina

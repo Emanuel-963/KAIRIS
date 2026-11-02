@@ -113,6 +113,18 @@ aceito será nulo e o fallback ESC G4 será omitido. Esses limiares foram calibr
 retrospectivamente no benchmark v1 e deverão ser reavaliados em dados externos;
 o escore de qualidade é uma margem heurística, não uma probabilidade.
 
+Quando o endpoint primário se abstiver, uma análise secundária poderá ajustar o
+limite assintótico `R∞ + A(jω)^−n` em janelas aninhadas de alta frequência. A
+estimativa só será exibida se o resíduo normalizado e a variação entre janelas
+atenderem aos limites configurados. O intervalo será chamado explicitamente de
+faixa de sensibilidade à janela, não de intervalo de confiança. Essa estimativa
+não substituirá o endpoint primário e não será usada no ESC G4.
+
+A contagem de picos DRT também terá política de cautela: um pico isolado não
+exclui processos sobrepostos; múltiplos picos só serão marcados como numericamente
+resolvidos quando a menor separação atingir 1,3 década no benchmark atual. A
+atribuição de mecanismos continuará dependendo de evidência externa.
+
 ## 6. Endpoints descritivos
 
 Serão relatados sem transformar automaticamente divergência em falha:

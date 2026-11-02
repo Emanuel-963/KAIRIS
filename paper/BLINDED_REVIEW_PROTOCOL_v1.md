@@ -53,6 +53,18 @@ revisores e consulta ao relatório KAIRIS são proibidas antes da primeira rodad
 - resultados separados por origem e por família, sem tratar espectros da mesma
   célula ou campanha como observações independentes.
 
+Após receber os dois formulários congelados, a análise reprodutível é executada
+sem abrir a chave de identificação:
+
+```bash
+python scripts/analyze_blinded_reviews.py reviewer_a.csv reviewer_b.csv \
+  --destination output/review_agreement_v1
+```
+
+O script produz kappa de Cohen, kappa quadrático ponderado, concordância bruta,
+IC de 95% por bootstrap, taxas de abstenção e uma lista separada de divergências
+para adjudicação.
+
 Ausências e respostas `indeterminada` não serão convertidas em erros. Serão
 relatadas como abstenções e analisadas separadamente.
 

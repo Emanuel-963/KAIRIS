@@ -120,8 +120,27 @@ class Agent2_DRT:
             "R_inf_hf_phase_deg": result.get("R_inf_hf_phase_deg"),
             "R_inf_hf_real_span_fraction": result.get("R_inf_hf_real_span_fraction"),
             "R_inf_abstention_reasons": result.get("R_inf_abstention_reasons", []),
+            "R_inf_extrapolation_status": result.get("R_inf_extrapolation_status", "not_available"),
+            "R_inf_extrapolated": result.get("R_inf_extrapolated"),
+            "R_inf_extrapolation_candidate": result.get("R_inf_extrapolation_candidate"),
+            "R_inf_extrapolation_interval": result.get("R_inf_extrapolation_interval"),
+            "R_inf_extrapolation_interval_type": result.get("R_inf_extrapolation_interval_type"),
+            "R_inf_extrapolation_exponent": result.get("R_inf_extrapolation_exponent"),
+            "R_inf_extrapolation_rmse_fraction": result.get("R_inf_extrapolation_rmse_fraction"),
+            "R_inf_extrapolation_window_spread_fraction": result.get(
+                "R_inf_extrapolation_window_spread_fraction"
+            ),
+            "R_inf_extrapolation_reasons": result.get("R_inf_extrapolation_reasons", []),
             "n_peaks": len(result["peaks"]),
             "peaks": [{key: value for key, value in peak.items() if not key.endswith("index")} for peak in result["peaks"]],
+            "drt_resolution_status": result.get("drt_resolution_status", "not_assessed"),
+            "drt_peak_count_reliable": result.get("drt_peak_count_reliable", False),
+            "drt_min_peak_separation_decades": result.get(
+                "drt_min_peak_separation_decades"
+            ),
+            "drt_resolution_threshold_decades": result.get(
+                "drt_resolution_threshold_decades"
+            ),
             "Z0_G1": result["Z0_G1"],
             "Z0_G2": result["Z0_G2"],
             "Z0_G2_complex": result["Z0_G2_complex"],

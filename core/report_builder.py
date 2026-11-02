@@ -108,6 +108,21 @@ def _r_inf_badge(summary: dict[str, Any]) -> str:
     )
 
 
+def _r_inf_extrapolation_badge(summary: dict[str, Any]) -> str:
+    if summary.get("R_inf_extrapolation_status") != "accepted":
+        return ""
+    tooltip = (
+        "Estimativa secundária pelo modelo assintótico R∞ + A(jω)^−n, aceita por "
+        "resíduo e estabilidade entre janelas. Não substitui a observação direta, "
+        "não é usada no ESC G4 e seu intervalo representa sensibilidade à janela."
+    )
+    escaped = html.escape(tooltip, quote=True)
+    return (
+        '<span class="diagnostic-badge secondary-badge" tabindex="0" '
+        f'data-tooltip="{escaped}" title="{escaped}">R∞ Extrapolated · Secondary</span>'
+    )
+
+
 def _inline_svg(path: str | Path) -> str:
     """Read a Matplotlib SVG as inline markup, without external file links."""
     content = Path(path).read_text(encoding="utf-8")
@@ -232,7 +247,11 @@ def build_html_report(
     chart_json = _safe_inline_json(_chart_payload(outputs))
     d3_script = _d3_script(config)
     provenance_html = _table(provenance or {})
-    diagnostic_badge = _diagnostic_badge(summary) + _r_inf_badge(summary)
+    diagnostic_badge = (
+        _diagnostic_badge(summary)
+        + _r_inf_badge(summary)
+        + _r_inf_extrapolation_badge(summary)
+    )
 
     document = f"""<!doctype html>
 <html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
@@ -250,6 +269,7 @@ table{{border-collapse:collapse;width:100%;margin:12px 0 20px}}th,td{{border:1px
 .static-grid{{display:grid;grid-template-columns:repeat(auto-fit,minmax(330px,1fr));gap:16px}}.static-svg{{margin:0;border:1px solid #d8e1e5;border-radius:10px;padding:8px}}.static-svg svg{{max-width:100%;height:auto}}figcaption{{text-align:center;color:var(--muted);font-size:.9rem}}
 .diagnostic-badge{{position:relative;display:inline-block;margin-left:.55rem;padding:.32rem .62rem;border-radius:999px;background:#6a3db8;color:#fff;font-size:.78rem;vertical-align:middle;cursor:help;letter-spacing:.01em}}
 .warning-badge{{background:#a13d2d}}
+.secondary-badge{{background:#276b55}}
 .diagnostic-badge:hover::after,.diagnostic-badge:focus::after{{content:attr(data-tooltip);position:absolute;z-index:30;left:0;top:calc(100% + .5rem);width:min(420px,75vw);padding:.65rem .75rem;border-radius:7px;background:#14272e;color:#fff;font-size:.78rem;font-weight:400;line-height:1.4;box-shadow:0 3px 14px #0005}}
 @media(max-width:600px){{main{{padding:10px}}.chart-grid{{grid-template-columns:1fr}}.chart-card{{padding:4px}}}}
 </style></head><body><main>

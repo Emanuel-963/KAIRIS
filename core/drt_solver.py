@@ -8,6 +8,8 @@ import numpy as np
 from scipy.optimize import lsq_linear
 from scipy.signal import find_peaks
 
+from core.r_inf_estimator import extrapolate_r_inf
+
 
 def _trapz(y: np.ndarray, x: np.ndarray) -> float:
     """Integrate with NumPy 1.x ``trapz`` and support versions that removed it."""
@@ -118,6 +120,7 @@ def solve_drt(
 
     r_inf = float(np.real(z[0]))
     r_inf_quality = assess_r_inf_quality(frequency, z.real, z.imag, config)
+    r_inf_extrapolation = extrapolate_r_inf(frequency, z.real, z.imag, config)
     target = z - r_inf
     kernel = 1.0 / (1.0 + 1j * omega[:, None] * tau[None, :])
     weighted_kernel = kernel * dlog_tau[None, :]
@@ -176,6 +179,28 @@ def solve_drt(
             }
         )
 
+    resolution_threshold = float(
+        config.get("drt_min_resolved_separation_decades", 1.30)
+    )
+    peak_times = [float(peak["tau"]) for peak in peaks]
+    separations = [
+        abs(float(np.log10(right / left)))
+        for left, right in zip(peak_times, peak_times[1:])
+        if left > 0 and right > 0
+    ]
+    if not peaks:
+        resolution_status = "no_detected_peaks"
+        peak_count_reliable = False
+        minimum_separation = None
+    elif len(peaks) == 1:
+        resolution_status = "indeterminate_single_peak"
+        peak_count_reliable = False
+        minimum_separation = None
+    else:
+        minimum_separation = min(separations)
+        peak_count_reliable = minimum_separation >= resolution_threshold
+        resolution_status = "resolved" if peak_count_reliable else "unresolved_overlap"
+
     if peaks:
         first_peak = peaks[0]
         r_ct = max(float(first_peak["area"]), np.finfo(float).eps)
@@ -215,7 +240,12 @@ def solve_drt(
         "gamma": gamma,
         "R_inf": r_inf,
         **r_inf_quality,
+        **r_inf_extrapolation,
         "peaks": peaks,
+        "drt_resolution_status": resolution_status,
+        "drt_peak_count_reliable": peak_count_reliable,
+        "drt_min_peak_separation_decades": minimum_separation,
+        "drt_resolution_threshold_decades": resolution_threshold,
         "lambda_regularization": regularization,
         "Z0_G1": r_ct,
         "Z0_G2": float(abs(z_w)),

@@ -32,6 +32,7 @@ if str(PROJECT) not in sys.path:
 from core.artifact_io import atomic_binary_writer, atomic_write_text  # noqa: E402
 from core.config_validator import validate_config  # noqa: E402
 from core.drt_solver import assess_r_inf_quality, solve_drt  # noqa: E402
+from core.r_inf_estimator import extrapolate_r_inf  # noqa: E402
 from core.report_builder import to_jsonable  # noqa: E402
 from scripts.analyze_synthetic_recovery import match_relaxation_times  # noqa: E402
 
@@ -40,6 +41,7 @@ DEFAULT_DESTINATION = PROJECT / "output" / "robustness_benchmark_v1"
 SEPARATION_DECADES = [0.20, 0.35, 0.50, 0.70, 1.00, 1.30, 1.70, 2.20, 3.00]
 NOISE_LEVELS = [0.0, 0.001, 0.003, 0.01, 0.03, 0.05, 0.10]
 FREQUENCY_MAX_LEVELS = [1e3, 3e3, 1e4, 3e4, 1e5, 3e5, 1e6, 3e6, 1e7, 3e7]
+EXTRAPOLATION_FREQUENCY_MAX_LEVELS = [300.0, 1e3, 3e3, 1e4, 3e4, 1e5, 3e5]
 Solver = Callable[[np.ndarray, np.ndarray, np.ndarray, dict[str, Any]], dict[str, Any]]
 
 
@@ -134,6 +136,13 @@ def _aggregate(records: list[dict[str, Any]]) -> list[dict[str, Any]]:
         recovered = sum(bool(row["recovered"]) for row in rows)
         exact = sum(bool(row["exact_peak_count"]) for row in rows)
         reliable = sum(bool(row["r_inf_reliable"]) for row in rows)
+        extrapolated = sum(bool(row.get("r_inf_extrapolation_accepted")) for row in rows)
+        extrapolation_errors = [
+            float(row["r_inf_extrapolation_error"])
+            for row in rows
+            if row.get("r_inf_extrapolation_error") is not None
+            and math.isfinite(float(row["r_inf_extrapolation_error"]))
+        ]
         summary.append(
             {
                 "level": level,
@@ -142,6 +151,10 @@ def _aggregate(records: list[dict[str, Any]]) -> list[dict[str, Any]]:
                 "recovery_wilson_ci95": _wilson_interval(recovered, len(rows)),
                 "exact_peak_count_fraction": exact / len(rows),
                 "r_inf_reliable_fraction": reliable / len(rows),
+                "r_inf_extrapolation_accepted_fraction": extrapolated / len(rows),
+                "r_inf_extrapolation_error_median": statistics.median(extrapolation_errors)
+                if extrapolation_errors
+                else None,
                 "tau_error_median": statistics.median(tau_errors),
                 "tau_error_q25_q75": [
                     float(value) for value in np.quantile(tau_errors, [0.25, 0.75])
@@ -250,6 +263,10 @@ def run_benchmark(
             quality = assess_r_inf_quality(
                 local_frequency, impedance.real, impedance.imag, config
             )
+            extrapolation = extrapolate_r_inf(
+                local_frequency, impedance.real, impedance.imag, config
+            )
+            extrapolated_candidate = extrapolation.get("R_inf_extrapolation_candidate")
             records.append(
                 {
                     "experiment": "high_frequency_truncation",
@@ -263,10 +280,58 @@ def run_benchmark(
                     "r_inf_relative_error": relative_error,
                     "r_inf_reliable": quality["R_inf_reliable"],
                     "r_inf_quality_score": quality["R_inf_quality_score"],
+                    "r_inf_extrapolation_accepted": extrapolation["R_inf_extrapolation_status"]
+                    == "accepted",
+                    "r_inf_extrapolation_error": abs(extrapolated_candidate - 0.2) / 0.2
+                    if extrapolated_candidate is not None
+                    else None,
                 }
             )
 
-    names = ("process_separation", "noise_sensitivity", "high_frequency_truncation")
+    # Secondary extrapolation on a single asymptotic CPE tail. This experiment
+    # measures the method's own operating domain; it does not alter primary R_inf.
+    for frequency_max in EXTRAPOLATION_FREQUENCY_MAX_LEVELS:
+        local_frequency = np.logspace(math.log10(frequency_max), -2, 101)
+        local_omega = 2.0 * np.pi * local_frequency
+        clean = 0.2 + zarc_from_tau(local_omega, 8.0, 1e-2, 0.85)
+        for replicate in range(replicates):
+            impedance = add_complex_noise(clean, 0.003, rng)
+            quality = assess_r_inf_quality(
+                local_frequency, impedance.real, impedance.imag, config
+            )
+            extrapolation = extrapolate_r_inf(
+                local_frequency, impedance.real, impedance.imag, config
+            )
+            candidate = extrapolation.get("R_inf_extrapolation_candidate")
+            direct_error = abs(float(impedance.real[0]) - 0.2) / 0.2
+            extrapolation_error = (
+                abs(float(candidate) - 0.2) / 0.2 if candidate is not None else None
+            )
+            records.append(
+                {
+                    "experiment": "r_inf_extrapolation_single_zarc",
+                    "level": frequency_max,
+                    "replicate": replicate + 1,
+                    "expected_processes": 1,
+                    "observed_peaks": None,
+                    "recovered": direct_error <= 0.05,
+                    "exact_peak_count": False,
+                    "median_log10_tau_error": 0.0,
+                    "r_inf_relative_error": direct_error,
+                    "r_inf_reliable": quality["R_inf_reliable"],
+                    "r_inf_quality_score": quality["R_inf_quality_score"],
+                    "r_inf_extrapolation_accepted": extrapolation["R_inf_extrapolation_status"]
+                    == "accepted",
+                    "r_inf_extrapolation_error": extrapolation_error,
+                }
+            )
+
+    names = (
+        "process_separation",
+        "noise_sensitivity",
+        "high_frequency_truncation",
+        "r_inf_extrapolation_single_zarc",
+    )
     summaries = {
         name: _aggregate([row for row in records if row["experiment"] == name])
         for name in names
@@ -301,6 +366,30 @@ def run_benchmark(
         "positive_predictive_value": true_positive / max(true_positive + false_positive, 1),
         "negative_predictive_value": true_negative / max(true_negative + false_negative, 1),
     }
+    extrapolation_rows = [
+        row for row in records if row["experiment"] == "r_inf_extrapolation_single_zarc"
+    ]
+    extrapolation_tp = sum(
+        row["r_inf_extrapolation_accepted"]
+        and row["r_inf_extrapolation_error"] is not None
+        and row["r_inf_extrapolation_error"] <= 0.05
+        for row in extrapolation_rows
+    )
+    extrapolation_fp = sum(
+        row["r_inf_extrapolation_accepted"]
+        and row["r_inf_extrapolation_error"] is not None
+        and row["r_inf_extrapolation_error"] > 0.05
+        for row in extrapolation_rows
+    )
+    extrapolation_rejected = len(extrapolation_rows) - extrapolation_tp - extrapolation_fp
+    extrapolation_calibration = {
+        "truth_definition": "accepted extrapolation has absolute relative error <= 0.05",
+        "accepted_accurate": extrapolation_tp,
+        "accepted_inaccurate": extrapolation_fp,
+        "rejected": extrapolation_rejected,
+        "positive_predictive_value": extrapolation_tp
+        / max(extrapolation_tp + extrapolation_fp, 1),
+    }
     return {
         "format": "KAIRIS-robustness-benchmark-v1",
         "generated_at": datetime.now(timezone.utc).isoformat(),
@@ -313,11 +402,13 @@ def run_benchmark(
             "process_separation": "two equal-amplitude ZARCs; n=0.90; 0.3% noise",
             "noise_sensitivity": "one ZARC; n=0.85",
             "high_frequency_truncation": "three ZARCs at 20 kHz, 120 Hz and 0.18 Hz; 0.3% noise",
+            "r_inf_extrapolation_single_zarc": "single ZARC; n=0.85; 0.3% noise",
         },
         "provenance": _provenance(config),
         "elapsed_seconds": time.perf_counter() - started,
         "summary": summaries,
         "r_inf_indicator_calibration": calibration,
+        "r_inf_extrapolation_calibration": extrapolation_calibration,
         "records": records,
     }
 
@@ -385,6 +476,45 @@ def _write_figure(result: dict[str, Any], path: Path) -> None:
     plt.close(fig)
 
 
+def _write_extrapolation_figure(result: dict[str, Any], path: Path) -> None:
+    rows = result["summary"]["r_inf_extrapolation_single_zarc"]
+    x = np.array([row["level"] for row in rows])
+    direct = np.array([row["r_inf_error_median"] for row in rows])
+    extrapolated = np.array(
+        [
+            row["r_inf_extrapolation_error_median"]
+            if row["r_inf_extrapolation_error_median"] is not None
+            else np.nan
+            for row in rows
+        ]
+    )
+    accepted = np.array([row["r_inf_extrapolation_accepted_fraction"] for row in rows])
+    fig, axis = plt.subplots(figsize=(7.6, 4.6), constrained_layout=True)
+    axis.plot(x, direct, "o-", label="medição na borda", color="#1b9e77")
+    axis.plot(x, extrapolated, "s-", label="extrapolação candidata", color="#d95f02")
+    axis.axhline(0.05, ls="--", color="#666", lw=0.9, label="erro de 5%")
+    axis.set_xscale("log")
+    axis.set_yscale("log")
+    axis.set(
+        xlabel="Frequência máxima (Hz)",
+        ylabel="Erro relativo mediano de R∞",
+        title="KAIRIS — extrapolação secundária de R∞",
+    )
+    second = axis.twinx()
+    second.plot(x, accepted, "^--", color="#756bb1", label="fração aceita")
+    second.set(ylabel="Fração de extrapolações aceitas", ylim=(-0.03, 1.03))
+    handles, labels = axis.get_legend_handles_labels()
+    handles2, labels2 = second.get_legend_handles_labels()
+    axis.legend(handles + handles2, labels + labels2, frameon=False, fontsize=8)
+    with atomic_binary_writer(path) as handle:
+        fig.savefig(
+            handle,
+            format="svg",
+            metadata={"Title": "KAIRIS secondary R_inf extrapolation benchmark"},
+        )
+    plt.close(fig)
+
+
 def write_outputs(result: dict[str, Any], destination: Path) -> None:
     destination.mkdir(parents=True, exist_ok=True)
     serializable = to_jsonable(result)
@@ -396,6 +526,7 @@ def write_outputs(result: dict[str, Any], destination: Path) -> None:
         "experiment", "level", "replicate", "expected_processes", "observed_peaks",
         "recovered", "exact_peak_count", "median_log10_tau_error", "r_inf_relative_error",
         "r_inf_reliable", "r_inf_quality_score",
+        "r_inf_extrapolation_accepted", "r_inf_extrapolation_error",
     ]
     stream = io.StringIO(newline="")
     writer = csv.DictWriter(stream, fieldnames=fields, lineterminator="\n")
@@ -403,6 +534,7 @@ def write_outputs(result: dict[str, Any], destination: Path) -> None:
     writer.writerows({field: row.get(field) for field in fields} for row in result["records"])
     atomic_write_text(destination / "robustness_records.csv", stream.getvalue())
     _write_figure(result, destination / "robustness_maps.svg")
+    _write_extrapolation_figure(result, destination / "r_inf_extrapolation_map.svg")
     separation = result["summary"]["process_separation"]
     stable = [row["level"] for row in separation if row["recovery_fraction"] >= 0.8]
     exact = [row["level"] for row in separation if row["exact_peak_count_fraction"] >= 0.8]
@@ -411,6 +543,7 @@ def write_outputs(result: dict[str, Any], destination: Path) -> None:
     noise = result["summary"]["noise_sensitivity"]
     robust_noise = [row["level"] for row in noise if row["recovery_fraction"] >= 0.8]
     calibration = result["r_inf_indicator_calibration"]
+    extrapolation = result["r_inf_extrapolation_calibration"]
     lines = [
         "# KAIRIS — benchmark retrospectivo de robustez", "",
         "> Estudo de sensibilidade de desenvolvimento; não confirmatório.", "",
@@ -427,6 +560,8 @@ def write_outputs(result: dict[str, Any], destination: Path) -> None:
         f"- Indicador R∞ — sensibilidade: {calibration['sensitivity']:.1%}",
         f"- Indicador R∞ — especificidade: {calibration['specificity']:.1%}",
         f"- Indicador R∞ — valor preditivo positivo: {calibration['positive_predictive_value']:.1%}",
+        f"- Extrapolação secundária — valor preditivo positivo: {extrapolation['positive_predictive_value']:.1%}",
+        f"- Extrapolação secundária — aceitações incorretas: {extrapolation['accepted_inaccurate']}",
         "",
         "Os limiares descrevem este modelo controlado e não devem ser generalizados "
         "para todos os sistemas eletroquímicos.", "",
