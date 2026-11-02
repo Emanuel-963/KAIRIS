@@ -335,3 +335,18 @@ Atualize-o, quando necessário, com:
 ```bash
 python -m piptools compile requirements.txt --output-file requirements.lock
 ```
+
+## Contribuição e suporte
+
+Contribuições científicas, novos formatos de arquivo, testes e melhorias de
+documentação são bem-vindos. Consulte [CONTRIBUTING.md](CONTRIBUTING.md) antes de
+abrir uma alteração. Problemas reproduzíveis e solicitações de suporte podem ser
+registrados no GitHub Issues sem anexar dados experimentais confidenciais.
+
+## Licenças
+
+O código-fonte e a documentação do KAIRIS são distribuídos sob a licença BSD
+3-Clause, disponível em [LICENSE](LICENSE). Dados de terceiros mantêm suas
+licenças originais e não são relicenciados pela licença do software. A
+proveniência e as condições dos conjuntos públicos incluídos estão descritas em
+[data/validation/kairis_eis_validation_v1/ATTRIBUTION.md](data/validation/kairis_eis_validation_v1/ATTRIBUTION.md).
