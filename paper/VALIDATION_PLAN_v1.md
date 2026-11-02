@@ -80,6 +80,19 @@ Para os seis espectros `randles_rc`:
 Esses limiares são critérios de desenvolvimento escolhidos após contato com o
 corpus atual. Eles não são endpoints confirmatórios prospectivos.
 
+### 5.3 Recuperação sintética multirrelaxação
+
+O script `scripts/analyze_synthetic_recovery.py` faz correspondência um a um por
+erro mínimo em log10(τ) nas famílias com tempos característicos definidos
+analiticamente: Randles, ZARC simples, ZARC duplo e ZARC triplo. Serão relatados
+número de picos, fração de processos pareados, erro de τ e erro de R∞, com IC de
+95% por bootstrap para medianas.
+
+Famílias difusivas, distribuídas, indutivas, com deriva ou outliers não serão
+forçadas a uma verdade de picos DRT. Seus resultados permanecem descritivos e são
+encaminhados à revisão humana cega. Como esta análise foi definida após inspeção
+do corpus, ela é retrospectiva e não cria novos critérios confirmatórios.
+
 ## 6. Endpoints descritivos
 
 Serão relatados sem transformar automaticamente divergência em falha:
@@ -107,6 +120,11 @@ Antes de abrir o futuro conjunto externo, deverão ser aprovados:
 8. política de abstinência;
 9. análise primária e análises secundárias;
 10. local de registro público do plano.
+
+O procedimento operacional de anotação está em
+`paper/BLINDED_REVIEW_PROTOCOL_v1.md`. O pacote cego deve ocultar nomes, origem,
+família e resultados dos agentes, incluir controles em ordem aleatória e manter a
+chave exclusivamente com o coordenador até o congelamento das avaliações.
 
 ## 8. LLM
 

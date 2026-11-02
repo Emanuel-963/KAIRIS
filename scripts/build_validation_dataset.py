@@ -138,7 +138,10 @@ def model_impedance(family: str, variant: int, frequency: np.ndarray) -> tuple[n
         q1 = 1.0 / (r1 * 2 * np.pi * 500.0)
         q2 = tau_ratio / (r2 * 2 * np.pi * 500.0)
         z = rs + zarc(w, r1, q1, 0.90) + zarc(w, r2, q2, 0.78)
-        parameters.update(R1_ohm=r1, R2_ohm=r2, Q1=q1, Q2=q2, tau_ratio=tau_ratio)
+        parameters.update(
+            R1_ohm=r1, R2_ohm=r2, Q1=q1, Q2=q2, n1=0.90, n2=0.78,
+            tau_ratio=tau_ratio,
+        )
     elif family == "triple_zarc":
         z = rs
         peaks = (2e4, 120.0, 0.18)
@@ -148,6 +151,7 @@ def model_impedance(family: str, variant: int, frequency: np.ndarray) -> tuple[n
             z = z + zarc(w, resistance, q, 0.88 - 0.05 * index)
             parameters[f"R{index}_ohm"] = resistance
             parameters[f"Q{index}"] = q
+            parameters[f"n{index}"] = 0.88 - 0.05 * index
     elif family == "warburg_semi_infinite":
         rct, q, sigma = 5.0 * scale, 4e-3 / scale, 1.2 * scale
         z = rs + zarc(w, rct, q, 0.88) + sigma / np.sqrt(1j * w)

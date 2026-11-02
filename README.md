@@ -229,6 +229,20 @@ forem satisfeitos. Os 198 espectros atuais já foram examinados durante o
 desenvolvimento e, portanto, são validação retrospectiva, não um holdout
 confirmatório intocado.
 
+Para caracterizar retrospectivamente a recuperação de R∞ e dos tempos de
+relaxação sintéticos identificáveis, e para preparar a revisão humana cega:
+
+```bash
+python scripts/analyze_synthetic_recovery.py --output output/validation_release_v1
+python scripts/build_blinded_review_pack.py \
+  --output output/validation_release_v1 \
+  --destination output/blinded_review_pack_v1
+```
+
+O segundo comando cria dados e figuras anonimizados em `reviewer/` e mantém a
+chave em `coordinator_only/`, que não deve ser entregue aos especialistas. O
+procedimento completo está em `paper/BLINDED_REVIEW_PROTOCOL_v1.md`.
+
 ## Relatórios offline
 
 O padrão carrega D3.js pelo CDN. Para gerar um HTML que também incorpore o D3, defina
