@@ -1,7 +1,8 @@
 {
   "format": "KAIRIS-validation-acceptance-v1",
-  "status": "development_acceptance_not_confirmatory",
-  "scope": "synthetic randles_rc reference family and release provenance",
+  "status": "frozen_retrospective_development_acceptance_v1",
+  "frozen_at": "2026-11-03",
+  "scope": "integrated KAIRIS synthetic randles_rc reference family and release provenance",
   "thresholds": {
     "artifact_completeness_fraction_min": 1.0,
     "input_hash_match_fraction_min": 1.0,
@@ -17,6 +18,7 @@
   "notes": [
     "These are development acceptance gates, not prospective confirmatory claims.",
     "The present corpus and its outputs were inspected before this file was frozen.",
-    "Confirmatory thresholds must be approved before collecting or opening a future external dataset."
+    "Confirmatory thresholds must be approved before collecting or opening a future external dataset.",
+    "Standalone GSF and ESC gates are frozen separately in standalone_validation_acceptance_v1.json."
   ]
 }

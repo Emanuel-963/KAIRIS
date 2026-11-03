@@ -1,6 +1,7 @@
 # Protocolo KAIRIS de revisão especializada cega — versão 1
 
-**Estado:** protocolo retrospectivo; requer aprovação do pesquisador responsável  
+**Estado:** aprovado e congelado para a fase retrospectiva em 3 de novembro de 2026
+
 **Unidade avaliada:** um espectro EIS completo  
 **Revisores:** no mínimo dois especialistas, trabalhando independentemente
 
@@ -11,11 +12,17 @@ especializada dos espectros com os regimes e alertas produzidos por DRT e GSF.
 Esta etapa cobre sobretudo respostas distribuídas, difusivas, indutivas ou
 degradadas, para as quais não existe uma verdade única de picos DRT.
 
+As saídas da branch `standalone/gsf` serão tratadas como outra execução do mesmo
+método, não como avaliador independente. As saídas da branch `standalone/esc` só
+serão confrontadas com rótulos humanos quando a hipótese física e a referência Z₀
+tiverem sido definidas antes da abertura dos resultados.
+
 ## Cegamento
 
 O script `scripts/build_blinded_review_pack.py` substitui nomes por identificadores
 aleatórios, randomiza a ordem e entrega apenas dados EIS brutos e gráficos Nyquist
-e Bode. Origem, família sintética, diagnósticos KAIRIS e chave de correspondência
+e Bode. Origem, família sintética, diagnósticos KAIRIS, resultados GSF/ESC
+integrados ou independentes e chave de correspondência
 ficam em `coordinator_only`, inacessível aos revisores até o congelamento das
 anotações.
 

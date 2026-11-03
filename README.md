@@ -227,8 +227,11 @@ interpretações da LLM só entram no dataset supervisionado após revisão huma
 
 ### Validação de uma release limpa
 
-O plano científico e os critérios de desenvolvimento estão em
-`paper/VALIDATION_PLAN_v1.md` e `config/validation_acceptance_v1.json`. Para uma
+O plano científico v1.0, aprovado e publicamente congelado, e os critérios de
+desenvolvimento estão em `paper/VALIDATION_PLAN_v1.md`,
+`config/validation_acceptance_v1.json` e
+`config/standalone_validation_acceptance_v1.json`. O plano inclui o KAIRIS
+integrado e os ramos independentes GSF e ESC. Para uma
 execução candidata à publicação, use um commit limpo, uma tag exata e um diretório
 de saída novo:
 

@@ -1,0 +1,41 @@
+{
+  "format": "KAIRIS-standalone-validation-acceptance-v1",
+  "status": "frozen_retrospective_development_acceptance_v1",
+  "frozen_at": "2026-11-03",
+  "branches": {
+    "gsf": {
+      "name": "standalone/gsf",
+      "commit": "26c50e1f3f922ccabfec3e8adaf2c7067af5af55"
+    },
+    "esc": {
+      "name": "standalone/esc",
+      "commit": "311f0c072193c1a36b289d63b0f4228f84e3d4eb"
+    }
+  },
+  "numeric_tolerances": {
+    "relative": 1e-10,
+    "absolute": 1e-12,
+    "esc_inverse_relative_error_max": 1e-10,
+    "esc_inverse_singularity_cutoff": 1e-12,
+    "esc_passivity_magnitude_tolerance": 1e-10
+  },
+  "gates": {
+    "supported_input_completion_fraction_min": 1.0,
+    "gsf_equivalence_fraction_min": 1.0,
+    "gsf_scale_invariance_fraction_min": 1.0,
+    "gsf_artifact_completeness_fraction_min": 1.0,
+    "esc_equivalence_fraction_min": 1.0,
+    "esc_inverse_consistency_fraction_min": 1.0,
+    "esc_passivity_bound_fraction_min": 1.0,
+    "esc_artifact_completeness_fraction_min": 1.0
+  },
+  "secondary_sensitivity": {
+    "gsf_impedance_scale_factors": [0.1, 10.0, 100.0],
+    "esc_reference_scale_factors": [0.5, 1.0, 2.0]
+  },
+  "notes": [
+    "These gates validate software equivalence and mathematical properties, not causal electrochemical interpretation.",
+    "The current 198-spectrum corpus was inspected before this freeze and remains retrospective.",
+    "A spectrum run through multiple branches remains one experimental unit."
+  ]
+}

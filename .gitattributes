@@ -6,3 +6,12 @@ data/validation/kairis_eis_validation_v1/**/*.txt -text
 
 # Launcher scripts must remain valid after a Windows checkout.
 *.sh text eol=lf
+
+# Frozen validation records use byte-stable hashes across operating systems.
+paper/VALIDATION_PLAN_v1.md text eol=lf
+paper/BLINDED_REVIEW_PROTOCOL_v1.md text eol=lf
+paper/DEVIATIONS_LOG_v1.md text eol=lf
+paper/PREREGISTRATION_RECORD_v1.md text eol=lf
+paper/validation_plan_manifest_v1.json text eol=lf
+config/validation_acceptance_v1.json text eol=lf
+config/standalone_validation_acceptance_v1.json text eol=lf
