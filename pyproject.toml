@@ -42,10 +42,11 @@ kairis = "run_pipeline:main"
 kairis-web = "web_app:main"
 kairis-setup = "setup_kairis:main"
 kairis-update = "update_kairis:main"
+kairis-esc = "standalone_esc:main"
 
 [tool.setuptools]
 packages = ["agents", "config", "core", "web"]
-py-modules = ["run_pipeline", "setup_kairis", "update_kairis", "web_app"]
+py-modules = ["run_pipeline", "setup_kairis", "standalone_esc", "update_kairis", "web_app"]
 include-package-data = true
 
 [tool.setuptools.package-data]

@@ -2,6 +2,10 @@
 
 **Kramers–Kronig-Assessed Impedance, Relaxation, and Integrated Spectroscopy**
 
+> Este é o ramo `standalone/esc`. Para usar somente o método original ESC,
+> consulte [STANDALONE_ESC.md](STANDALONE_ESC.md). O protocolo integrado permanece
+> na branch `main`.
+
 Pipeline científico sem circuito equivalente para espectroscopia de impedância
 eletroquímica. O KAIRIS executa EIS → DRT → GSF → ESC e produz um relatório HTML
 interativo pelo navegador.
