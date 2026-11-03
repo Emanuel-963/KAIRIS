@@ -2,6 +2,10 @@
 
 **Kramers–Kronig-Assessed Impedance, Relaxation, and Integrated Spectroscopy**
 
+> Este é o ramo `standalone/gsf`. Para usar somente o método original GSF,
+> consulte [STANDALONE_GSF.md](STANDALONE_GSF.md). O protocolo integrado permanece
+> na branch `main`.
+
 Pipeline científico sem circuito equivalente para espectroscopia de impedância
 eletroquímica. O KAIRIS executa EIS → DRT → GSF → ESC e produz um relatório HTML
 interativo pelo navegador.
