@@ -6,6 +6,9 @@ Pipeline científico sem circuito equivalente para espectroscopia de impedância
 eletroquímica. O KAIRIS executa EIS → DRT → GSF → ESC e produz um relatório HTML
 interativo pelo navegador.
 
+O plano operacional para validação externa, reprodução e submissão científica em
+2027 está em [`paper/ROADMAP_TO_SUBMISSION_2027.md`](paper/ROADMAP_TO_SUBMISSION_2027.md).
+
 ## Instalação assistida
 
 Os instaladores verificam Python, criam o ambiente virtual, instalam as dependências
