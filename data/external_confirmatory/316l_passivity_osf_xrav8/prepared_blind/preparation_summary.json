@@ -1,0 +1,11 @@
+{
+  "format": "KAIRIS-external-cohort-preparation-v1",
+  "source_sha256": "01c85092b46a68a832124d7327157b6327a0d440ea3b66ba277694432edfb8b3",
+  "seed": "20261104",
+  "sample_count": 42,
+  "points_per_sample": 36,
+  "frequency_min_hz": 0.01,
+  "frequency_max_hz": 100000.0,
+  "phase_convention": "source positive capacitive angle; output is -Im(Z)",
+  "scientific_analysis_performed": false
+}

@@ -1,0 +1,143 @@
+%% KAIRIS working manuscript for Electrochimica Acta.
+%% Based on Elsevier CAS single-column template v2.4 (LPPL).
+\documentclass[a4paper,fleqn]{cas-sc}
+
+\usepackage[numbers,sort&compress]{natbib}
+\usepackage{booktabs}
+\usepackage{siunitx}
+
+\begin{document}
+\let\WriteBookmarks\relax
+\def\floatpagepagefraction{1}
+\def\textpagefraction{.001}
+
+\shorttitle{KAIRIS: a reproducible multiperspective EIS protocol}
+\shortauthors{Author list pending}
+
+\title[mode=title]{KAIRIS (Kramers--Kronig-Assessed Impedance, Relaxation,
+and Integrated Spectroscopy): A Multiperspective Protocol for Reproducible
+Electrochemical Impedance Spectroscopy}
+
+\author[1]{Author details pending}
+\cormark[1]
+\ead{corresponding.author@example.org}
+\credit{Conceptualization, Methodology, Software, Validation, Writing}
+
+\affiliation[1]{organization={Affiliation pending},
+  city={City pending},
+  country={Country pending}}
+
+\cortext[1]{Corresponding author}
+
+\begin{abstract}
+Electrochemical impedance spectroscopy can provide complementary views of
+interfacial, transport and distributed processes, but its interpretation is
+limited by data admissibility, non-unique representations and workflows that do
+not preserve uncertainty or disagreement. This study introduces KAIRIS
+(Kramers--Kronig-Assessed Impedance, Relaxation, and Integrated Spectroscopy), a
+reproducible protocol integrating spectral validation, distribution of
+relaxation times, global spectral features and electrochemical spectral
+cartography. The confirmatory design, quantitative results and externally
+validated domain of applicability will be inserted only after the frozen
+analysis is completed.
+\end{abstract}
+
+\begin{highlights}
+\item KAIRIS integrates Lin--KK, DRT, GSF and ESC in a reproducible EIS workflow.
+\item Distinct spectral observables are compared without forcing artificial agreement.
+\item Deterministic rules preserve abstention without requiring a language model.
+\end{highlights}
+
+\begin{keywords}
+electrochemical impedance spectroscopy \sep distribution of relaxation times
+\sep Kramers--Kronig \sep reproducibility \sep spectral analysis
+\end{keywords}
+
+\maketitle
+
+\section{Introduction}\label{sec:introduction}
+
+% Define the EIS interpretation problem, the limits of equivalent-circuit
+% uniqueness, and the need for complementary observables and abstention.
+
+\section{Scientific questions and hypotheses}\label{sec:hypotheses}
+
+% State the frozen H1--H6 hypotheses and distinguish retrospective from
+% prospective validation.
+
+\section{Methods}\label{sec:methods}
+
+\subsection{KAIRIS protocol}\label{sec:protocol}
+
+\subsection{Spectral admissibility and Lin--KK}\label{sec:linkk}
+
+\subsection{Distribution of relaxation times}\label{sec:drt}
+
+\subsection{Global spectral features}\label{sec:gsf}
+
+\subsection{Electrochemical spectral cartography}\label{sec:esc}
+
+\subsection{Datasets and leakage prevention}\label{sec:datasets}
+
+\subsection{External 316L confirmatory cohort}\label{sec:external}
+
+The selected external cohort contains 42 impedance spectra of welded 316L
+stainless steel measured in aerated \SI{0.1}{\mole\per\litre} NaCl. It comprises
+eight surface/region conditions and two passivity reference groups. Selection,
+exclusions, endpoints and the analysis lock will be described from the registered
+external-validation addendum before results are accessed.
+
+\subsection{Blinded expert assessment}\label{sec:experts}
+
+\subsection{Baselines, ablations and sensitivity}\label{sec:baselines}
+
+\subsection{Statistical analysis}\label{sec:statistics}
+
+\subsection{Software and computational reproducibility}\label{sec:software}
+
+\section{Results}\label{sec:results}
+
+% Do not write confirmatory results before the analysis lock is opened.
+
+\subsection{Engineering integrity and portability}
+
+\subsection{Synthetic parameter recovery}
+
+\subsection{External scientific validation}
+
+\subsection{Expert agreement and abstention}
+
+\subsection{Ablations, sensitivity and discordance taxonomy}
+
+\section{Discussion}\label{sec:discussion}
+
+\subsection{Complementarity of DRT, GSF and ESC}
+
+\subsection{Domain of applicability and limitations}
+
+\section{Conclusions}\label{sec:conclusions}
+
+\section*{Data and code availability}
+
+Code is developed openly at
+\url{https://github.com/Emanuel-963/KAIRIS}. Persistent release and data
+identifiers will be inserted before submission.
+
+\section*{CRediT authorship contribution statement}
+
+Author roles pending confirmation.
+
+\section*{Declaration of competing interest}
+
+Declaration pending author confirmation.
+
+\section*{Acknowledgements}
+
+Funding and acknowledgements pending confirmation.
+
+\printcredits
+
+\bibliographystyle{cas-model2-names}
+\bibliography{references}
+
+\end{document}

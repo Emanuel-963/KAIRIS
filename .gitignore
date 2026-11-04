@@ -13,6 +13,7 @@ __pycache__/
 *.py[cod]
 output/
 data/input/
+data/external_confirmatory/**/coordinator/
 .env
 config/local_config.json
 *.tmp

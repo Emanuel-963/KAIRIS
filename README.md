@@ -8,6 +8,9 @@ interativo pelo navegador.
 
 O plano operacional para validação externa, reprodução e submissão científica em
 2027 está em [`paper/ROADMAP_TO_SUBMISSION_2027.md`](paper/ROADMAP_TO_SUBMISSION_2027.md).
+O periódico-alvo, a alternativa editorial e o template oficial estão registrados
+em [`paper/JOURNAL_SELECTION.md`](paper/JOURNAL_SELECTION.md). O manuscrito LaTeX
+começa em [`paper/manuscript_electrochimica_acta/main.tex`](paper/manuscript_electrochimica_acta/main.tex).
 
 ## Instalação assistida
 
