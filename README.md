@@ -247,6 +247,19 @@ forem satisfeitos. Os 198 espectros atuais já foram examinados durante o
 desenvolvimento e, portanto, são validação retrospectiva, não um holdout
 confirmatório intocado.
 
+Para executar os gates congelados H3–H6 dos ramos GSF e ESC independentes, mantenha
+os dois checkouts irmãos nas branches e commits registrados no plano e execute:
+
+```bash
+python scripts/evaluate_standalone_gates.py \
+  --output output/standalone_validation_v1 \
+  --enforce
+```
+
+O executor recusa branches alteradas ou em commits diferentes, produz JSON e HTML
+atômicos e compara todas as 198 amostras. `--limit 1` está disponível apenas para
+smoke tests e é identificado como subconjunto no relatório.
+
 Para caracterizar retrospectivamente a recuperação de R∞ e dos tempos de
 relaxação sintéticos identificáveis, e para preparar a revisão humana cega:
 

@@ -52,5 +52,13 @@ jobs:
       - name: Run test suite
         run: python -m pytest -q
 
+      - name: Smoke-test frozen standalone gates
+        shell: bash
+        run: |
+          git fetch --depth=1 origin standalone/gsf standalone/esc
+          git worktree add ../kairis-gsf-standalone 26c50e1f3f922ccabfec3e8adaf2c7067af5af55
+          git worktree add ../kairis-esc-standalone 311f0c072193c1a36b289d63b0f4228f84e3d4eb
+          python scripts/evaluate_standalone_gates.py --limit 1 --output .standalone_gate_smoke --enforce
+
       - name: Check prerequisites
         run: python setup_kairis.py --check

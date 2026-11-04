@@ -4,6 +4,7 @@
 .agent_cli_test/
 .web_preview/
 .web_training_preview/
+.standalone_gate_smoke/
 .pip-tools-cache/
 .pytest_cache/
 .coverage
