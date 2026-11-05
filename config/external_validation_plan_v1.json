@@ -126,8 +126,6 @@
   "administrative_registration": {
     "private_signoff_file": "data/external_confirmatory/316l_passivity_osf_xrav8/coordinator/administrative_signoff.json",
     "required_acceptances": ["reviewer_A", "reviewer_B", "reviewer_R"],
-    "osf_registration_id": null,
-    "osf_registered_at": null,
-    "analysis_unlocked": false
+    "public_registration_record": "paper/EXTERNAL_VALIDATION_REGISTRATION_RECORD.json"
   }
 }

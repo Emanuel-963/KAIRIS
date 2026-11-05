@@ -106,13 +106,16 @@ def evaluate_readiness(
         "complete" if signoff else f"missing private file: {signoff_path}",
     ))
 
-    registration = plan["administrative_registration"]
+    registration_path = PROJECT / plan["administrative_registration"]["public_registration_record"]
+    registration: dict[str, Any] = {}
+    if registration_path.is_file():
+        registration = json.loads(registration_path.read_text(encoding="utf-8"))
     registration_complete = bool(registration.get("osf_registration_id")) and bool(
         registration.get("osf_registered_at")
-    )
+    ) and registration.get("coordinator_verified_registered_package") is True
     gates.append(_gate(
         "osf_registration", registration_complete,
-        str(registration.get("osf_registration_id") or "not registered"),
+        str(registration.get("osf_registration_id") or f"missing record: {registration_path}"),
     ))
 
     identity_path = PROJECT / plan["execution"]["analysis_identity_source"]
@@ -148,7 +151,13 @@ def evaluate_readiness(
         "clean" if clean else ("not checked" if not check_git else "uncommitted changes present"),
     ))
 
-    ready = all(item["passed"] for item in gates) and registration.get("analysis_unlocked") is True
+    unlocked = registration.get("analysis_unlocked") is True
+    gates.append(_gate(
+        "coordinator_unlock_after_registration", unlocked,
+        "unlocked" if unlocked else "locked",
+    ))
+
+    ready = all(item["passed"] for item in gates)
     return {
         "format": "KAIRIS-external-validation-readiness-v1",
         "ready_for_scientific_analysis": ready,

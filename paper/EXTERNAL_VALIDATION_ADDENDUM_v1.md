@@ -257,6 +257,12 @@ Only after every applicable item is complete and the coordinator explicitly sets
 `analysis_unlocked=true` may the status change to
 `approved_registered_analysis_unlocked`.
 
+After registration, copy
+`paper/EXTERNAL_VALIDATION_REGISTRATION_TEMPLATE.json` to
+`paper/EXTERNAL_VALIDATION_REGISTRATION_RECORD.json`, fill the OSF identifier,
+URL and timestamp, verify the registered package, and only then set the unlock
+field to `true`. This separate record preserves the byte-identical frozen plan.
+
 The mechanical gate is:
 
 ```bash

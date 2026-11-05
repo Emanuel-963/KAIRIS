@@ -10,5 +10,6 @@ def test_external_cohort_is_technically_ready_but_administratively_locked():
     assert gates["reviewer_materials_specified"] is True
     assert gates["private_acceptances_and_conflicts"] is False
     assert gates["osf_registration"] is False
+    assert gates["coordinator_unlock_after_registration"] is False
     assert result["ready_for_scientific_analysis"] is False
     assert result["analysis_lock"] == "locked"
