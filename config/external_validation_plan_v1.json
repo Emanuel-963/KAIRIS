@@ -1,0 +1,133 @@
+{
+  "format": "KAIRIS-external-validation-plan-v1",
+  "status": "scientific_specification_complete_analysis_locked_pending_registration",
+  "cohort": {
+    "id": "316l_passivity_osf_xrav8",
+    "case_count": 42,
+    "frequency_count_per_case": 36,
+    "source_sha256": "01c85092b46a68a832124d7327157b6327a0d440ea3b66ba277694432edfb8b3",
+    "source_subgroup_counts": {
+      "AW-BASE": 4,
+      "AW-HAZ": 4,
+      "HI-REF": 4,
+      "LO-REF": 4,
+      "MC-BASE": 4,
+      "MC-HAZ": 4,
+      "PAW-BASE": 3,
+      "PAW-HAZ": 4,
+      "PMC-BASE": 5,
+      "PMC-HAZ": 6
+    }
+  },
+  "execution": {
+    "llm_enabled": false,
+    "llm_memory_enabled": false,
+    "supervised_learning_enabled": false,
+    "overwrite": false,
+    "fresh_output_required": true,
+    "analysis_identity_source": "paper/EXTERNAL_VALIDATION_FREEZE_RECORD.json",
+    "required_tag": "external-validation-plan-v1.0"
+  },
+  "analysis_unit": {
+    "unit": "frequency_resolved_spectrum",
+    "case_id_field": "case_id",
+    "dependence_status": "physical_coupon_mapping_not_publicly_resolved",
+    "bootstrap_group": "source_subgroup",
+    "bootstrap_group_count": 10,
+    "bootstrap_draws": 2000,
+    "bootstrap_seed": 20261105,
+    "confidence_level": 0.95,
+    "rationale": "The source does not publicly resolve coupon/site dependence for every row. Resampling the ten source subgroups is the conservative frozen fallback."
+  },
+  "primary_endpoints": {
+    "P1_integrity": {
+      "type": "binary_gate",
+      "all_cases_accounted_fraction_min": 1.0,
+      "pipeline_completion_fraction_min": 1.0,
+      "completed_case_artifact_fraction_min": 1.0,
+      "completed_case_input_hash_match_fraction_min": 1.0,
+      "completed_case_provenance_fraction_min": 1.0,
+      "partial_artifact_count_max": 0,
+      "silent_failure_count_max": 0
+    },
+    "P2_dominant_response_agreement": {
+      "type": "estimation_without_minimum_accuracy_threshold",
+      "human_reference": "exact_pre_adjudication_consensus_of_reviewer_A_and_reviewer_B",
+      "human_field": "dominant_response",
+      "classes": ["kinetic", "diffusive", "pseudocapacitive", "mixed"],
+      "metrics": ["macro_f1", "balanced_accuracy", "per_class_recall", "confusion_matrix"],
+      "uncertainty": "95_percent_source_subgroup_bootstrap_interval",
+      "minimum_scientific_success_threshold": null,
+      "rationale": "With 42 cases, uncertain within-source dependence and no external pilot effect size, the confirmatory aim is estimation and domain characterization rather than a powered superiority claim."
+    }
+  },
+  "kairis_response_mapping": {
+    "required_lin_kk_valid": true,
+    "kinetic_dominated|resistive": "kinetic",
+    "diffusion_dominated|diffusive": "diffusive",
+    "diffusion_dominated|pseudocapacitive|intercalation_pseudocapacitive": "pseudocapacitive",
+    "mixed|mixed": "mixed",
+    "all_other_combinations": "undetermined"
+  },
+  "abstention_policy": {
+    "human_no_consensus": [
+      "reviewers_disagree_on_dominant_response",
+      "either_reviewer_uses_undetermined",
+      "either_required_rating_is_missing"
+    ],
+    "kairis_abstention": [
+      "lin_kk_invalid",
+      "required_module_failed",
+      "unmapped_drt_gsf_combination",
+      "generic_drt_gsf_inconsistency"
+    ],
+    "primary_denominator": "cases_with_exact_human_consensus_in_one_of_the_four_evaluable_classes",
+    "scoring": "KAIRIS abstentions remain in the denominator and count as not-classified, never as correct; cases without a human consensus are excluded from P2 but counted and reported separately."
+  },
+  "secondary_endpoints": {
+    "human_agreement": [
+      "raw_agreement",
+      "cohen_kappa",
+      "quadratic_weighted_kappa_for_ordinal_fields",
+      "reviewer_specific_abstention_fraction"
+    ],
+    "post_adjudication_sensitivity": [
+      "macro_f1",
+      "balanced_accuracy",
+      "per_class_recall",
+      "confusion_matrix"
+    ],
+    "intercalation_pattern": {
+      "human_field": "intercalation_pseudocapacitive",
+      "kairis_value": "diagnostic=intercalation_pseudocapacitive",
+      "metrics": ["sensitivity", "specificity", "positive_predictive_value", "negative_predictive_value", "abstention_fraction"]
+    },
+    "gsf_descriptors": ["alpha_mean", "alpha_std", "I_crit", "f_Icrit", "kphi_mean"],
+    "drt_descriptors": ["n_drt_peaks", "drt_resolution_status", "R_inf_status", "R_ct"],
+    "reference_anchor_contrasts": {
+      "groups": ["LO-REF", "HI-REF"],
+      "ordered_expectation": "HI-REF greater than LO-REF",
+      "descriptors": ["log10_abs_Z_at_0.01_Hz", "R_ct"],
+      "statistics": ["group_median", "median_difference", "cliffs_delta", "all_70_case_label_permutations"],
+      "interpretation": "secondary sensitivity analysis only; not causal ground truth and not a primary pass/fail test"
+    }
+  },
+  "esc_policy": {
+    "role": "descriptive_only",
+    "included_groups": ["G1", "G2", "G3"],
+    "excluded_from_scientific_contrast": ["G4"],
+    "reason": "The public cohort does not supply the sample-specific paste-cell geometry needed to justify the configured conductivity/geometry reference. No ESC geometry will select a mechanism or determine success."
+  },
+  "multiplicity": {
+    "primary_family": "No multiplicity adjustment: P1 is an integrity gate and P2 is an estimation endpoint without null-hypothesis success testing.",
+    "secondary_hypothesis_tests": "Holm adjustment within each explicitly reported family; both raw and adjusted p-values are reported.",
+    "exploratory_analyses": "Clearly labelled exploratory; effect estimates and intervals are emphasized over dichotomous p-value decisions."
+  },
+  "administrative_registration": {
+    "private_signoff_file": "data/external_confirmatory/316l_passivity_osf_xrav8/coordinator/administrative_signoff.json",
+    "required_acceptances": ["reviewer_A", "reviewer_B", "reviewer_R"],
+    "osf_registration_id": null,
+    "osf_registered_at": null,
+    "analysis_unlocked": false
+  }
+}

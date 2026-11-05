@@ -319,6 +319,36 @@ python scripts/analyze_blinded_reviews.py reviewer_a.csv reviewer_b.csv \
   --destination output/review_agreement_v1
 ```
 
+### Validação externa confirmatória
+
+O conjunto externo de 42 espectros permanece bloqueado até o aceite privado do
+painel, a identidade imutável de código/configuração, a tag e o registro OSF:
+
+```bash
+python scripts/check_external_validation_readiness.py
+```
+
+O pacote cego, que contém somente dados convertidos e gráficos Nyquist/Bode sem
+rótulos de origem ou resultados do KAIRIS, pode ser preparado antes da análise:
+
+```bash
+python scripts/build_external_review_pack.py \
+  --destination output/external_review_pack_v1
+```
+
+Somente quando o verificador informar `ready_for_scientific_analysis: true`, use
+um diretório de saída novo:
+
+```bash
+python scripts/run_external_validation.py \
+  --output output/external_validation_316l_v1
+```
+
+As perguntas, denominadores, regras de abstenção, mapeamento DRT–GSF e política
+estatística estão congelados em
+[`paper/EXTERNAL_VALIDATION_ADDENDUM_v1.md`](paper/EXTERNAL_VALIDATION_ADDENDUM_v1.md)
+e `config/external_validation_plan_v1.json`.
+
 ## Relatórios offline
 
 O padrão carrega D3.js pelo CDN. Para gerar um HTML que também incorpore o D3, defina

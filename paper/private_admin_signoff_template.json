@@ -1,0 +1,21 @@
+{
+  "format": "KAIRIS-private-external-validation-signoff-v1",
+  "privacy_warning": "Keep this completed file only in the ignored coordinator directory. Do not add names, affiliations, ORCIDs or signed declarations to the public repository.",
+  "reviewer_A": {
+    "accepted_role": false,
+    "conflict_declaration_received": false,
+    "deadline_accepted": false
+  },
+  "reviewer_B": {
+    "accepted_role": false,
+    "conflict_declaration_received": false,
+    "deadline_accepted": false
+  },
+  "reviewer_R": {
+    "accepted_role": false,
+    "conflict_declaration_received": false,
+    "deadline_accepted": false
+  },
+  "review_deadline_iso8601": null,
+  "coordinator_approved_at_iso8601": null
+}

@@ -1,6 +1,7 @@
-# KAIRIS external validation addendum — draft v1
+# KAIRIS external validation addendum — version 1.0
 
-**Status:** draft; not approved, not tagged and not registered
+**Status:** scientific specification complete; analysis locked pending private
+acceptances, immutable code identity and OSF registration
 
 **Draft created:** 4 November 2026
 
@@ -8,8 +9,10 @@
 
 **KAIRIS agents executed on this cohort:** no
 
-This document must be completed, approved and registered before any execution of
-Lin--KK, DRT, GSF, ESC or the KAIRIS orchestrator on the external cohort.
+The scientific decisions are executable in
+`config/external_validation_plan_v1.json`. No Lin--KK, DRT, GSF, ESC or KAIRIS
+orchestrator execution is authorized until
+`scripts/check_external_validation_readiness.py` reports every gate as passed.
 
 ## 1. Confirmed external source
 
@@ -84,15 +87,14 @@ exclusion criteria.
 
 ## 5. Experimental unit and dependence
 
-Each frequency-resolved spectrum is one analysis case. Before registration, the
-coordinator must confirm whether multiple rows originate from the same physical
-coupon, weld, acquisition site or repeated measurement. All cases sharing a
-physical origin must remain in the same bootstrap group. If the public metadata
-cannot resolve this dependence, uncertainty will be calculated conservatively at
-the subgroup level and the limitation will be stated.
-
-**Required before approval:** document the confirmed grouping key or the exact
-conservative fallback.
+Each frequency-resolved spectrum is one analysis case. The public table contains
+42 unique case rows distributed across ten source subgroups: AW-BASE 4, AW-HAZ 4,
+MC-BASE 4, MC-HAZ 4, PAW-BASE 3, PAW-HAZ 4, PMC-BASE 5, PMC-HAZ 6, LO-REF 4 and
+HI-REF 4. The public metadata does not resolve, for every row, whether sites or
+spectra share a coupon. Therefore, the frozen conservative fallback is to
+bootstrap the **ten source subgroups**, not individual frequency points or 42
+rows, using 2,000 draws, seed `20261105` and 95% intervals. This does not prove
+independence within or between source subgroups; the limitation must be stated.
 
 ## 6. Blinded expert review
 
@@ -134,25 +136,93 @@ outputs.
 Detailed responsibilities and declarations are recorded in
 `paper/REVIEWER_ROLES_AND_CONFLICTS_v1.md`.
 
-**Required before approval:** written acceptance, complete names and
-affiliations, signed conflict declarations, ORCID identifiers when available,
-frozen training examples and delivery deadline.
+The public repository contains only role identifiers. Written acceptance,
+identity, affiliation, ORCID when available, relevant experience, conflict
+declaration and delivery deadline stay in the ignored coordinator directory.
+The public template is `paper/private_admin_signoff_template.json`; the completed
+private file is a readiness gate and must never be committed.
 
 ## 7. Confirmatory questions and endpoints
 
-The following must be completed without opening KAIRIS results:
+### 7.1 Primary scientific question
 
-1. define the primary external scientific question;
-2. identify which expert annotations are primary;
-3. identify the pre-specified continuous GSF descriptors, if any;
-4. define whether the low/high passivity references support an ordered contrast;
-5. define the physically justified ESC reference or declare ESC descriptive;
-6. set success thresholds, denominators and handling of abstentions;
-7. justify whether 42 cases provide estimation, hypothesis testing or both;
-8. define multiplicity handling for any confirmatory subgroup comparison.
+Can the frozen deterministic KAIRIS produce complete, auditable outputs on an
+independent experimental corrosion/passivity cohort and, when its spectral
+admissibility and two-observable mapping permit a classification, how closely
+does its dominant-response classification agree with an independent exact
+pre-adjudication consensus of two blinded specialists?
 
-Until these items are approved, the cohort is downloaded and technically ready
-but the scientific analysis remains locked.
+The claim is deliberately about reproducibility, classification agreement and
+abstention. It is not a claim that KAIRIS recovers a unique circuit or a causal
+mechanism.
+
+### 7.2 P1 — integrity and provenance gate
+
+All 42 cases must be accounted for and complete. Every completed case must have
+consolidated JSON, HTML, matching input SHA-256 and full provenance; partial
+artifacts and silent failures must equal zero. A documented failure makes P1
+fail, but is retained with its reason rather than silently excluded. P1 is binary
+and all fraction thresholds are 100%; partial and silent failure counts must be
+zero.
+
+### 7.3 P2 — dominant-response agreement
+
+The primary human reference is exact agreement between Reviewer A and Reviewer B
+on `dominant_response` **before adjudication**, restricted to `kinetic`,
+`diffusive`, `pseudocapacitive` and `mixed`. The frozen KAIRIS mapping is:
+
+| DRT | GSF | extra condition | P2 class |
+|---|---|---|---|
+| `kinetic_dominated` | `resistive` | Lin-KK valid | `kinetic` |
+| `diffusion_dominated` | `diffusive` | Lin-KK valid | `diffusive` |
+| `diffusion_dominated` | `pseudocapacitive` | diagnostic is `intercalation_pseudocapacitive` and Lin-KK valid | `pseudocapacitive` |
+| `mixed` | `mixed` | Lin-KK valid | `mixed` |
+| any other combination | any | — | `undetermined` |
+
+P2 reports macro-F1 and balanced accuracy over human classes represented in the
+primary denominator, class-wise precision/recall/F1, confusion matrix and the
+KAIRIS abstention fraction, with grouped 95% bootstrap intervals. A KAIRIS
+abstention remains in the denominator and is never counted as correct. Human
+disagreement, `undetermined` or a required missing rating creates **no human
+consensus** and is counted separately rather than scored as a KAIRIS error.
+
+This 42-case cohort is an estimation study: no minimum accuracy, superiority or
+non-inferiority threshold will be introduced. The absence of an external pilot
+effect size, uncertain physical dependence and likely class imbalance do not
+support an honest powered threshold. This is an explicit decision, not a pending
+item. Only P1 has confirmatory pass/fail gates.
+
+### 7.4 Secondary endpoints
+
+- pre-adjudication raw agreement, Cohen kappa and ordinal weighted kappa;
+- the same P2 metrics after adjudication, labelled secondary;
+- sensitivity, specificity, predictive values and abstention for the explicit
+  `intercalation_pseudocapacitive` diagnostic when a human yes/no reference exists;
+- frozen GSF descriptors: `alpha_mean`, `alpha_std`, `I_crit`, `f_Icrit` and
+  `kphi_mean`;
+- frozen DRT descriptors: peak count, resolution status, R∞ status and `R_ct`;
+- a secondary ordered-reference sensitivity analysis expecting HI-REF > LO-REF
+  for `log10(|Z|)` at 0.01 Hz and `R_ct`, reporting medians, median difference,
+  Cliff's delta and all 70 allocations of four versus four reference cases.
+
+The reference contrast is not causal ground truth and cannot promote an
+exploratory descriptor to a primary endpoint.
+
+### 7.5 ESC decision
+
+ESC G1--G3 will be reported descriptively. G4 is excluded from scientific
+contrasts because the public cohort does not provide the sample-specific
+paste-cell geometry required to justify the conductivity/geometry reference in
+the KAIRIS configuration. No visual regularity or ESC reference may select a
+mechanism, exclude a case or determine study success.
+
+### 7.6 Multiplicity
+
+P1 is an integrity gate and P2 is estimation without a null-hypothesis success
+test, so no primary multiplicity adjustment applies. Any secondary family that
+reports hypothesis-test p-values will use Holm adjustment within that declared
+family and report both raw and adjusted values. Exploratory work will be labelled
+as such and emphasize estimates and intervals.
 
 ## 8. Planned reporting independent of pass/fail thresholds
 
@@ -172,16 +242,52 @@ At minimum, the study will report:
 
 Approval requires:
 
-- [ ] physical grouping/dependence resolved;
+- [x] conservative dependence fallback frozen at source-subgroup level;
 - [x] two primary specialists and one reserve nominated and assigned roles;
 - [ ] written acceptance and conflict declarations received;
-- [ ] primary and secondary endpoints frozen;
-- [ ] success thresholds and statistical contrasts frozen;
-- [ ] reviewer materials frozen;
+- [x] primary and secondary endpoints frozen;
+- [x] success policy, denominators, abstentions and contrasts frozen;
+- [x] reviewer instructions and annotation schema frozen;
 - [ ] exact code commit and configuration identified;
 - [ ] OSF registration submitted before KAIRIS execution;
 - [ ] registration identifier and timestamp added here;
 - [ ] immutable Git tag created.
 
-Only after every applicable item is complete may the status change to
-`approved_registered_analysis_locked`.
+Only after every applicable item is complete and the coordinator explicitly sets
+`analysis_unlocked=true` may the status change to
+`approved_registered_analysis_unlocked`.
+
+The mechanical gate is:
+
+```bash
+python scripts/check_external_validation_readiness.py
+```
+
+Exit code `2` means the analysis remains locked. After the private acceptances,
+freeze record, Git tag and OSF fields have been completed, the registered run is:
+
+```bash
+python scripts/run_external_validation.py \
+  --output output/external_validation_316l_v1
+```
+
+The review package can be generated before scientific analysis because it
+contains raw converted EIS only:
+
+```bash
+python scripts/build_external_review_pack.py \
+  --destination output/external_review_pack_v1
+```
+
+After both reviewer files are locked, the primary statistical analysis is:
+
+```bash
+python scripts/analyze_blinded_reviews.py reviewer_A_form.csv reviewer_B_form.csv \
+  --destination output/external_review_agreement_v1
+
+python scripts/analyze_external_confirmation.py \
+  --output output/external_validation_316l_v1 \
+  --reviewer-a reviewer_A_form.csv --reviewer-b reviewer_B_form.csv \
+  --mapping data/external_confirmatory/316l_passivity_osf_xrav8/coordinator/blinding_key.csv \
+  --destination output/external_confirmatory_analysis_v1
+```

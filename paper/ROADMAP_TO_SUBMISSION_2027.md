@@ -535,12 +535,14 @@ para a submissão ao JOSS em maio de 2027.
 
 ## 13. Próxima ação imediata
 
-O próximo artefato prioritário é
-`paper/EXTERNAL_VALIDATION_ADDENDUM_v1.md`. Ele deve ser preenchido e revisado até
-17 de novembro, registrado no OSF antes da abertura dos resultados e ligado a uma
-tag Git. Em paralelo, devem ser confirmados os dois especialistas e a fonte do
-conjunto externo. Nenhuma nova funcionalidade supera essas três tarefas em
-prioridade científica.
+O adendo científico e sua configuração executável foram concluídos em 5 de
+novembro. O próximo gate P0 é administrativo e imutável: obter os aceites e
+declarações privadas dos três papéis, registrar o commit/configuração no freeze
+record, criar a tag `external-validation-plan-v1.0` e registrar o pacote no OSF.
+O comando `python scripts/check_external_validation_readiness.py` deve continuar
+bloqueando a análise até todos esses itens passarem. Em paralelo, o pacote cego
+pode ser entregue aos dois revisores, pois contém apenas EIS bruto convertido e
+não expõe rótulos nem saídas KAIRIS.
 
 ## Referências operacionais
 
