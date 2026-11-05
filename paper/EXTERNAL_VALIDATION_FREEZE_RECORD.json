@@ -1,0 +1,15 @@
+{
+  "format": "KAIRIS-external-validation-freeze-record-v1",
+  "recorded_at": "2026-11-05T23:38:14.0823838Z",
+  "analysis_code_commit": "94a03c366b0d26ec8f2e05befed0660fb2ff0f1d",
+  "git_tag": "external-validation-plan-v1.0",
+  "external_plan_path": "config/external_validation_plan_v1.json",
+  "external_plan_sha256": "ccc861cc42dd8917c0b30a5563532465f97ec4073ef746aef8e953980a87c550",
+  "protocol_config_path": "config/protocol_config.json",
+  "protocol_config_sha256": "6100c92553c469c9064eaead405b8b904f6ef15aca75ee82cd78cdaf8abd9dc5",
+  "reviewer_instructions_path": "paper/EXTERNAL_REVIEWER_INSTRUCTIONS_v1.md",
+  "reviewer_instructions_sha256": "b72cead83dfcf7d28cf29181cd4b18be8969689fa5bf65cc0688e5871ebb9eb8",
+  "source_sha256": "01c85092b46a68a832124d7327157b6327a0d440ea3b66ba277694432edfb8b3",
+  "llm_primary_analysis": false,
+  "note": "The tag identifies the frozen scientific code and plan. OSF registration and private reviewer sign-offs remain separate readiness gates."
+}
