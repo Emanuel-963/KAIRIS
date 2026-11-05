@@ -49,6 +49,11 @@ revisores e consulta ao relatório KAIRIS são proibidas antes da primeira rodad
    adjudica sem receber o resultado do KAIRIS.
 6. A chave é aberta somente depois do congelamento das decisões humanas.
 
+Os nomes, conflitos declarados, responsabilidades e a regra de ativação da
+reserva são mantidos em `paper/REVIEWER_ROLES_AND_CONFLICTS_v1.md`. Se a pessoa
+reserva substituir um dos dois revisores primários, ela não poderá também ser
+tratada como terceira adjudicadora independente na mesma rodada.
+
 ## Análise estatística pré-especificada
 
 - kappa de Cohen para qualidade, resposta dominante e indicação de

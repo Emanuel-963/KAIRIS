@@ -1,4 +1,4 @@
-"""KAIRIS Agent 4: Emanuel-Smith Chart transformations for four DRT references."""
+"""KAIRIS Agent 4: Electrochemical Spectral Cartography for four DRT references."""
 
 from __future__ import annotations
 

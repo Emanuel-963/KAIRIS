@@ -289,7 +289,7 @@ table{{border-collapse:collapse;width:100%;margin:12px 0 20px}}th,td{{border:1px
 <section><h2>3. Golden Spectral Field</h2>{_table(agent3_metrics)}
 <div class="chart-card"><h3>Mapa q interativo</h3><div id="q-map" class="chart"></div></div>
 <h3>Métricas estáticas</h3><div class="static-grid">{static_svgs}</div></section>
-<section><h2>4. Diagrama de Emanuel-Smith</h2>{_table(agent4_metrics)}<div class="chart-grid">
+<section><h2>4. Electrochemical Spectral Cartography (ESC)</h2><p class="note">A ESC usa a transformação bilinear clássica de Smith; a contribuição do KAIRIS está nas referências eletroquímicas, nos descritores e nas regras de abstenção, não na transformação matemática.</p>{_table(agent4_metrics)}<div class="chart-grid">
 {''.join(f'<article class="chart-card"><h3>ESC {group}</h3><p class="zoom-hint">Role para zoom; arraste para navegar.</p><div id="esc-{group.lower()}" class="chart"></div></article>' for group in ('G1','G2','G3','G4'))}
 </div></section>
 <section><h2>5. Síntese integrada {diagnostic_badge}</h2>{_table(summary)}<h3>Interpretação por regras</h3><ul>{rules_html}</ul>{llm_html}</section>

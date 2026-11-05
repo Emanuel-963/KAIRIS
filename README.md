@@ -3,8 +3,10 @@
 **Kramers–Kronig-Assessed Impedance, Relaxation, and Integrated Spectroscopy**
 
 Pipeline científico sem circuito equivalente para espectroscopia de impedância
-eletroquímica. O KAIRIS executa EIS → DRT → GSF → ESC e produz um relatório HTML
-interativo pelo navegador.
+eletroquímica. O KAIRIS executa EIS → DRT → GSF → ESC (Electrochemical Spectral
+Cartography) e produz um relatório HTML interativo pelo navegador. A ESC aplica
+a transformação bilinear clássica de Smith a referências eletroquímicas
+explicitamente definidas; o projeto não reivindica a transformação como nova.
 
 O plano operacional para validação externa, reprodução e submissão científica em
 2027 está em [`paper/ROADMAP_TO_SUBMISSION_2027.md`](paper/ROADMAP_TO_SUBMISSION_2027.md).

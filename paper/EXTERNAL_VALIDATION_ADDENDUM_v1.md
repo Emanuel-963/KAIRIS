@@ -96,14 +96,47 @@ conservative fallback.
 
 ## 6. Blinded expert review
 
-Two primary specialists and one reserve specialist will be named by the
-responsible researcher. Reviewers will receive opaque case identifiers, raw
-Nyquist/Bode views and the frozen annotation form. They will not receive KAIRIS
-outputs, source subgroup names or the coordinator key before their annotations
-are locked.
+The review panel will be recorded publicly only by blinded role. Personally
+identifying information, qualifications and relationships are retained in the
+coordinator's private records and are not committed to the public repository.
 
-**Required before approval:** names/roles, conflict declarations, reviewer
-training examples, delivery deadline and reserve-activation rule.
+| Panel role | Public identifier | Assigned responsibility |
+|---|---|---|
+| Primary specialist A | Reviewer A | complete the entire frozen annotation form for every eligible case, independently and under blinding |
+| Primary specialist B | Reviewer B | complete the same entire frozen annotation form for every eligible case, independently and under blinding |
+| Reserve specialist and adjudicator | Reviewer R | replace a primary reviewer if the activation rule is met, or adjudicate only the disagreements that persist after inter-reviewer agreement has been calculated |
+
+Any relevant academic or collaborative relationships are documented in the
+private conflict declarations and summarized in the submitted article only
+with the reviewers' explicit consent. The annotations
+will be independent in the operational sense: separate files, no discussion, no
+access to each other's decisions and no access to KAIRIS outputs before both
+files are locked. The external status of this validation refers to the cohort
+and its originating institution, not to the review panel.
+
+All three reviewers will receive opaque case identifiers, raw Nyquist/Bode
+views, the frozen annotation form and the same written instructions. They will
+not receive KAIRIS outputs, source subgroup names or the coordinator key before
+the applicable annotations or adjudications are locked. Training will use only
+examples outside the 42-case external cohort and will teach the annotation
+schema without revealing expected KAIRIS classifications.
+
+The reserve specialist will be activated when a primary specialist withdraws,
+does not return a complete usable form by the frozen deadline, or has more than
+10% of required fields missing after one administrative completeness query. In
+that replacement role, the reserve specialist must annotate the full cohort
+blindly and independently. If both primary forms are usable, the reserve will
+instead act only as adjudicator for disagreements that remain after agreement
+statistics have been calculated. Adjudication will not erase or replace the
+original disagreement dataset, and the adjudicator will not receive KAIRIS
+outputs.
+
+Detailed responsibilities and declarations are recorded in
+`paper/REVIEWER_ROLES_AND_CONFLICTS_v1.md`.
+
+**Required before approval:** written acceptance, complete names and
+affiliations, signed conflict declarations, ORCID identifiers when available,
+frozen training examples and delivery deadline.
 
 ## 7. Confirmatory questions and endpoints
 
@@ -140,7 +173,8 @@ At minimum, the study will report:
 Approval requires:
 
 - [ ] physical grouping/dependence resolved;
-- [ ] two specialists and reserve confirmed;
+- [x] two primary specialists and one reserve nominated and assigned roles;
+- [ ] written acceptance and conflict declarations received;
 - [ ] primary and secondary endpoints frozen;
 - [ ] success thresholds and statistical contrasts frozen;
 - [ ] reviewer materials frozen;

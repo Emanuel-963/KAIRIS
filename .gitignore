@@ -18,3 +18,15 @@ data/external_confirmatory/**/coordinator/
 config/local_config.json
 *.tmp
 
+# LaTeX build products (the manuscript sources remain versioned).
+paper/manuscript_electrochimica_acta/*.abs
+paper/manuscript_electrochimica_acta/*.aux
+paper/manuscript_electrochimica_acta/*.bbl
+paper/manuscript_electrochimica_acta/*.blg
+paper/manuscript_electrochimica_acta/*.fdb_latexmk
+paper/manuscript_electrochimica_acta/*.fls
+paper/manuscript_electrochimica_acta/*.log
+paper/manuscript_electrochimica_acta/*.out
+paper/manuscript_electrochimica_acta/*.synctex.gz
+paper/manuscript_electrochimica_acta/main.pdf
+

@@ -57,43 +57,389 @@ electrochemical impedance spectroscopy \sep distribution of relaxation times
 
 \section{Introduction}\label{sec:introduction}
 
-% Define the EIS interpretation problem, the limits of equivalent-circuit
-% uniqueness, and the need for complementary observables and abstention.
+Electrochemical impedance spectroscopy (EIS) probes the frequency-dependent
+response of an electrochemical system with a small sinusoidal perturbation. Its
+ability to resolve processes occurring on different time scales has made it a
+central technique in batteries, corrosion, fuel cells, sensors and interfacial
+electrochemistry \cite{Wang2021EIS,Boukamp2025Guidance}. The measured complex
+impedance, however, is not a direct label of a physicochemical mechanism. It is
+conditioned by linearity, stability, causal consistency, frequency coverage,
+measurement error and cell geometry. Low-frequency drift and high-frequency
+instrumental effects can therefore be mistaken for material properties when
+data admissibility and uncertainty are not treated explicitly
+\cite{Wang2021EIS,Boukamp2025Guidance}.
+
+Equivalent-circuit fitting remains useful when a defensible physical model is
+available, but several circuit topologies can reproduce a finite, noisy
+spectrum, and fitted elements need not be uniquely identifiable. This ambiguity
+becomes more consequential in heterogeneous electrodes, porous structures and
+systems with overlapping charge-transfer and transport responses. Automated
+circuit classification can improve throughput, yet published benchmarks still
+identify label identifiability as a limiting problem \cite{Schaeffer2023AutoECM}.
+Consequently, a scalable analysis should not force every spectrum into one
+circuit or equate numerical fit quality with mechanistic truth.
+
+Two complementary strategies address different parts of this problem.
+Kramers--Kronig (KK) relations test whether a spectrum is compatible with the
+constraints expected of a linear, stable and causal response; the linear KK
+(Lin--KK) construction provides a practical validity test using a logarithmic
+series of RC elements and an over-fitting control parameter
+\cite{Schonleber2014LinKK}. Distribution-of-relaxation-times (DRT) analysis then
+maps the frequency-domain response to relaxation time, reducing dependence on a
+preselected equivalent circuit. DRT inversion is nevertheless ill posed, and
+peak number, width and area depend on regularization, frequency range and noise
+\cite{CiucciChen2015DRT,BoukampRolle2017DRT}. Neither KK compatibility nor a DRT
+peak is, by itself, proof of one electrochemical mechanism.
+
+A second limitation is that commonly reported representations emphasize
+different observables. Nyquist geometry, Bode magnitude and phase, relaxation
+time, normalized spectral evolution and reference-impedance mappings need not
+produce identical classifications. Apparent disagreement may contain useful
+information rather than constitute an analytical failure. For example, local
+diffusion in an insertion host can coexist with a macroscopically
+pseudocapacitive response, as established for intercalation-pseudocapacitive
+materials \cite{Augustyn2013Intercalation}. A protocol should therefore preserve
+module-specific evidence, define compatible patterns a priori and abstain when
+the available spectrum does not support a reliable conclusion.
+
+Here we introduce KAIRIS---Kramers--Kronig-Assessed Impedance, Relaxation, and
+Integrated Spectroscopy---as an open, circuit-independent-first protocol for
+multiview EIS analysis. KAIRIS combines (i) input harmonization, local spectral
+smoothness and Lin--KK compatibility; (ii) non-negative Tikhonov DRT; (iii) the
+Golden Spectral Field (GSF), introduced here to quantify normalized spectral
+evolution; (iv) Electrochemical Spectral Cartography (ESC), which applies the
+classical Smith bilinear transform to four explicitly recorded electrochemical
+reference impedances; and (v) a deterministic
+orchestrator that reports agreement, disagreement and abstention. GSF and ESC
+are also released as independent modules so their mathematical properties and
+incremental contribution can be tested separately.
+
+The contribution is deliberately framed as a reproducible analytical protocol,
+not an automatic oracle for true mechanisms. We evaluate software integrity,
+known-parameter recovery, modular equivalence, invariance, sensitivity and
+expert agreement. A 198-spectrum development and retrospective corpus is kept
+separate from a 42-spectrum experimental cohort from an independent institution
+\cite{Martinez2026Clustering}. The external cohort remains locked until the
+confirmatory endpoints and blinded-review materials are registered. The primary
+analysis does not require a large language model (LLM), and complete
+configuration, input hashes and software versions are retained with each
+result, following the broader objective of reusable and auditable research
+objects \cite{Wilkinson2016FAIR}.
 
 \section{Scientific questions and hypotheses}\label{sec:hypotheses}
 
-% State the frozen H1--H6 hypotheses and distinguish retrospective from
-% prospective validation.
+The primary question is whether KAIRIS can produce complementary and auditable
+Lin--KK, DRT, GSF and ESC descriptors while explicitly reporting insufficient
+evidence or disagreement without dependence on an LLM. Six hypotheses were
+fixed before confirmatory processing. H1 requires every supported input to
+produce complete artifacts or an explicit traceable failure. H2 tests recovery
+of $R_\infty$ and known relaxation times in simple synthetic references. H3 and
+H5 require numerical equivalence between the integrated and standalone GSF and
+ESC implementations, respectively. H4 tests invariance of normalized GSF
+descriptors to positive uniform impedance scaling. H6 tests algebraic inversion
+of ESC outside declared singular points. H3--H6 establish implementation and
+mathematical properties; they do not establish causal electrochemical validity.
+
+The 198 spectra inspected during development are used for retrospective
+validation, regression testing and failure characterization. They are not
+described as an untouched holdout. Confirmatory claims are reserved for the
+separately sourced 42-spectrum cohort and will be evaluated only after the
+external addendum, code revision, configuration and review protocol are locked
+and registered.
 
 \section{Methods}\label{sec:methods}
 
 \subsection{KAIRIS protocol}\label{sec:protocol}
 
+KAIRIS is implemented as five sequential Python agents. Agent~1 imports and
+orders the EIS data, computes a local smoothness indicator and performs Lin--KK.
+Agent~2 estimates a DRT and derives four candidate reference impedances.
+Agent~3 calculates GSF descriptors independently from the DRT. Agent~4 applies
+the ESC transform for each reference. Agent~5 consolidates the outputs,
+provenance and deterministic interpretation into one JSON record and one
+self-contained HTML report. A failure in any agent is logged with sample and
+stage identifiers; batch processing continues with the next sample. Artifacts
+are first flushed and synchronized to a temporary file in the destination
+directory and then committed with an atomic replacement.
+
+Text and CSV inputs are detected by header rather than filename-specific
+templates. Supported encodings, decimal comma or point, and tab, semicolon or
+comma delimiters are resolved before parsing. Aliases for frequency,
+$\operatorname{Re}(Z)$, $\operatorname{Im}(Z)$ and $-\operatorname{Im}(Z)$ are
+mapped to a common representation. Non-numeric rows, non-positive frequencies
+and duplicate frequencies are removed deterministically, and retained points are
+sorted from high to low frequency. A local JSON Schema validates all effective
+configuration values before analysis.
+
 \subsection{Spectral admissibility and Lin--KK}\label{sec:linkk}
+
+Local spectral smoothness and integral Lin--KK compatibility are reported as
+separate quantities. For smoothness, every complex point $Z_i$ is reconstructed
+by linear interpolation of its adjacent points in $\ln f$; one-sided
+extrapolation is used at the endpoints. The local residue is
+\begin{equation}
+ r_i^{\mathrm{local}} =
+ \frac{|Z_i-\widehat Z_i|}
+ {\max\{|Z_i|,\operatorname{median}(|Z|),\epsilon\}}.
+\end{equation}
+The strict and permissive point thresholds are 0.05 and 0.15, respectively.
+This statistic detects local irregularity and is explicitly not called a KK
+test.
+
+Lin--KK represents the spectrum as \cite{Schonleber2014LinKK}
+\begin{equation}
+ Z_{\mathrm{LinKK}}(\omega)=R_0+
+ \sum_{k=1}^{M}\frac{R_k}{1+\mathrm{j}\omega\tau_k}
+ +\mathrm{j}\omega L,
+ \label{eq:linkk}
+\end{equation}
+where $\tau_k$ are logarithmically spaced between
+$1/(2\pi f_{\max})$ and $1/(2\pi f_{\min})$. Real and imaginary components are
+fit simultaneously by linear least squares after division by $|Z|$. The number
+of RC elements increases from 3 to at most 50 while the complex system is kept
+overdetermined. The over-fitting statistic is
+\begin{equation}
+ \mu=1-\frac{\sum_{R_k<0}|R_k|}{\sum_{R_k\geq 0}|R_k|}.
+\end{equation}
+The first candidate satisfying $\mu\leq0.85$, normalized RMSE $\leq5\%$ and no
+more than 10\% of points with normalized magnitude residue above 5\% is selected.
+Failure is retained as an analytical outcome and does not silently exclude a
+spectrum. Lin--KK compatibility does not replace experimental verification of
+linearity and stationarity \cite{Wang2021EIS,Boukamp2025Guidance}.
 
 \subsection{Distribution of relaxation times}\label{sec:drt}
 
+KAIRIS uses the log-time DRT convention
+\begin{equation}
+ Z(\omega)=R_\infty+
+ \int_{-\infty}^{\infty}
+ \frac{\gamma(\ln\tau)}{1+\mathrm{j}\omega\tau}\,\mathrm{d}\ln\tau.
+ \label{eq:drt}
+\end{equation}
+The measured real component at the highest frequency is retained as the raw
+$R_\infty$. It is accepted as a primary high-frequency intercept only when the
+eight highest-frequency points are available, the absolute phase at the highest
+frequency is at most $7^{\circ}$, and the relative span of their real components
+is at most 0.10. Otherwise KAIRIS preserves the raw value for audit but abstains
+from the primary $R_\infty$ endpoint. A separately labelled asymptotic estimate
+is secondary and never silently replaces the primary value.
+
+The interval from $1/(2\pi f_{\max})$ to $1/(2\pi f_{\min})$ is discretized into
+100 logarithmically spaced relaxation times. For each
+$\lambda\in[10^{-8},10^2]$ on a 25-point logarithmic grid, KAIRIS solves
+\begin{equation}
+ \widehat{\boldsymbol\gamma}_{\lambda}=
+ \underset{\boldsymbol\gamma\geq0}{\arg\min}\;
+ \|\mathbf K\boldsymbol\gamma-\mathbf z\|_2^2+
+ \lambda\|\mathbf D_2\boldsymbol\gamma\|_2^2,
+ \label{eq:tikhonov}
+\end{equation}
+where real and imaginary equations are stacked and $\mathbf D_2$ is the
+second-difference operator. The regularization value is selected at maximum
+discrete curvature of the log residual--log roughness L-curve
+\cite{Hansen1992LCurve}. This non-negative Tikhonov construction is consistent
+with established DRT formulations \cite{CiucciChen2015DRT}, while its limitations
+for sharp, asymmetric or overlapping processes remain explicit
+\cite{BoukampRolle2017DRT,Boukamp2025Guidance}.
+
+Peaks are local maxima with prominence of at least 5\% of the global maximum.
+Peak area is integrated in $\ln\tau$ between adjacent local minima. Multiple
+peaks are labelled numerically resolved only when every adjacent pair is
+separated by at least 1.3 decades; a single detected peak is not used to claim
+that the underlying system contains exactly one physical process. For descriptive
+stratification, a spectrum is labelled kinetic-dominated when the largest peak
+has $\tau<0.01$~s and the fraction of DRT area above 1~s is below 0.25;
+diffusion-dominated when the largest-peak $\tau>1$~s or that fraction exceeds
+0.60; all remaining cases are labelled mixed.
+
 \subsection{Global spectral features}\label{sec:gsf}
+
+The Golden Spectral Field (GSF) is introduced as a normalized, descriptive view
+of how a spectrum evolves across its ordered frequency points. It does not fit an
+equivalent circuit. For increasing frequency,
+\begin{equation}
+ x_n=\frac{\operatorname{Re}(Z)}{\max\operatorname{Re}(Z)},\qquad
+ y_n=\frac{|\operatorname{Im}(Z)|}{\max|\operatorname{Im}(Z)|},\qquad
+ q_n=\sqrt{x_n^2+y_n^2}.
+ \label{eq:gsf-normalization}
+\end{equation}
+If the real maximum is non-positive, its maximum absolute value is used as a
+finite scaling fallback. A centred three-point moving mean is applied to
+$\ln q$. With $\varphi=(1+\sqrt5)/2$, the local sequential exponent, golden
+scaling descriptor and spectral gradient are
+\begin{equation}
+ \alpha_n=\frac{\ln(q_n/q_{n-1})}{\ln\varphi},\qquad
+ k_{\varphi,n}=\varphi q_n,\qquad
+ S_n=\frac{\mathrm d\alpha}{\mathrm d\ln f}.
+ \label{eq:gsf-descriptors}
+\end{equation}
+The critical index is $I_{\mathrm{crit}}=\max|S_n|$, with its frequency retained.
+The mean finite $\alpha$ provides a pre-specified descriptive regime:
+resistive for $\bar\alpha>-0.1$, pseudocapacitive for
+$-0.5\leq\bar\alpha\leq-0.1$, mixed for
+$-1.0\leq\bar\alpha<-0.5$, and diffusive for $\bar\alpha<-1.0$. These labels are
+operational hypotheses to be validated, not causal mechanism assignments.
 
 \subsection{Electrochemical spectral cartography}\label{sec:esc}
 
+Electrochemical Spectral Cartography (ESC) is introduced as an electrochemical
+reference and descriptor framework built on the classical Smith bilinear
+mapping \cite{Smith1939Transmission,Siroma2025Graphing}. No originality is
+claimed for the impedance-to-reflection-coefficient transformation itself.
+For an explicit reference impedance $Z_0$,
+\begin{equation}
+ \Gamma(\omega;Z_0)=\frac{Z(\omega)-Z_0}{Z(\omega)+Z_0},
+ \qquad
+ Z=Z_0\frac{1+\Gamma}{1-\Gamma}.
+ \label{eq:esc}
+\end{equation}
+Points for which $Z+Z_0$ is numerically singular are declared undefined. For
+each mapping, KAIRIS retains frequency, the complex $\Gamma$, $|\Gamma|$, the
+centroid, mean $|\Gamma|$ and the low-frequency point. Four reference groups are
+calculated: G1, the area of the first detected DRT peak; G2, the complex measured
+impedance nearest $\operatorname{Re}(Z)=|\operatorname{Im}(Z)|$; G3, the
+impedance magnitude nearest the characteristic frequency of the first DRT peak;
+and G4, the electrolyte--geometry resistance
+\begin{equation}
+ Z_{0,\mathrm{G4}}=\frac{L}{\kappa A}.
+\end{equation}
+G4 is used only when an electrolyte in the input filename matches a configured
+conductivity and positive $L$, $\kappa$ and $A$ are available. Otherwise a
+reliable measured $R_\infty$ is used as a labelled fallback; if it is not
+reliable, G4 abstains. No mapping is selected retrospectively because it appears
+more regular. ESC inversion, passivity for positive real $Z_0$, reference
+sensitivity and equivalence with the standalone implementation are evaluated
+separately.
+
+\subsection{Deterministic synthesis and reporting}\label{sec:synthesis}
+
+Agent~5 applies transparent rules to the module outputs. Concordance is not
+forced: module-specific regimes and an inconsistency flag are retained. One
+pre-specified compatibility pattern is DRT diffusion-dominated together with
+GSF pseudocapacitive, reported as \emph{intercalation pseudocapacitive} rather
+than as inconsistency because the modules address local time-domain transport
+and global normalized spectral evolution, respectively
+\cite{Augustyn2013Intercalation}. This rule is a diagnostic hypothesis and does
+not establish material identity.
+
+The primary analysis runs with the optional Ollama LLM disabled. Thus, all
+diagnoses used in validation are deterministic and reproducible. LLM text, when
+enabled in a secondary analysis, is clearly separated from rule output and
+falls back to rules if the local service is unavailable. The final HTML embeds
+all numerical data as inline JSON, uses interactive D3 charts for Nyquist, Bode,
+DRT, ESC and the GSF $q$ map, and includes static SVG GSF traces. Each consolidated
+record stores the input SHA-256, an ISO~8601 timestamp, effective package
+versions and the sanitized complete configuration.
+
 \subsection{Datasets and leakage prevention}\label{sec:datasets}
+
+The retrospective corpus contains 198 directly executable spectra: 72
+deterministic KAIRIS synthetic spectra spanning 12 response families; 72 labelled
+synthetic spectra sampled deterministically from the nine-class AutoECM corpus
+(45 development and 27 published-test cases) \cite{Schaeffer2023AutoECM}; and 54
+public experimental spectra from NMC811 21700 cells measured at 30\% state of
+charge \cite{Moertelmaier2025Dataset}. Because these data and some outputs were
+inspected during development, all 198 are treated as retrospective even when the
+upstream source called a partition a test set.
+
+All spectra from the same physical cell, study or acquisition campaign remain in
+the same statistical group. Frequency points from one spectrum are never split
+between development and evaluation. Running one spectrum through the integrated
+pipeline and standalone branches does not create independent observations.
+Synthetic ground truth is used only for quantities defined by the generator;
+published experimental condition labels are not relabelled as causal mechanism
+truth.
 
 \subsection{External 316L confirmatory cohort}\label{sec:external}
 
 The selected external cohort contains 42 impedance spectra of welded 316L
 stainless steel measured in aerated \SI{0.1}{\mole\per\litre} NaCl. It comprises
-eight surface/region conditions and two passivity reference groups. Selection,
-exclusions, endpoints and the analysis lock will be described from the registered
-external-validation addendum before results are accessed.
+eight surface/region conditions and two passivity reference groups, with 36
+frequencies from 0.01~Hz to 100~kHz \cite{Martinez2026Clustering}. The source
+wide-form Bode values are converted deterministically as
+$|Z|=10^{\log_{10}|Z|}$,
+$\operatorname{Re}(Z)=|Z|\cos\theta$ and
+$-\operatorname{Im}(Z)=|Z|\sin\theta$. Source hashes are verified before opaque
+case identifiers are generated; the condition key is held outside version
+control.
+
+All 42 spectra are planned for inclusion. Checksum mismatch, duplicate source
+identity, non-finite source values, irrecoverable magnitude--phase frequency
+mismatch or documented repository corruption are the only pre-analysis
+exclusions. Lin--KK failure, unusual morphology, downstream non-convergence and
+module or specialist disagreement are outcomes, not exclusions. KAIRIS has not
+been executed on this cohort at the time of writing. Confirmatory processing
+will begin only after physical grouping, endpoints, statistical contrasts,
+review materials, code commit and configuration are registered.
 
 \subsection{Blinded expert assessment}\label{sec:experts}
 
+Two doctoral-level postdoctoral researchers serve as primary specialists and a
+master's-level specialist is designated as reserve. The primary specialists are
+academic supervisors of the responsible researcher; this relationship is
+declared, and the panel is not described as institutionally independent.
+Operational independence is enforced through separate files, no discussion and
+no access to source labels, KAIRIS outputs or each other's decisions before both
+forms are hashed and locked.
+
+Each specialist evaluates the full eligible set using identical Nyquist and Bode
+views and records spectral quality, dominant response, apparent number of
+processes, compatibility with intercalation pseudocapacitance, confidence and
+any proposed exclusion. Training examples are outside the 42-case external
+cohort. Agreement is calculated before discussion. The reserve either replaces
+one incomplete primary review by blindly annotating the full cohort, or
+adjudicates persistent disagreements without receiving KAIRIS outputs; the same
+person cannot perform both roles in one round. Original disagreements remain in
+the analysis after adjudication.
+
 \subsection{Baselines, ablations and sensitivity}\label{sec:baselines}
+
+Planned comparisons include KAIRIS Lin--KK and DRT against established reference
+implementations on identical inputs. Ablations remove GSF or ESC from the
+deterministic synthesis without changing upstream outputs. DRT sensitivity is
+evaluated across noise, frequency truncation, point density, relaxation
+separation and regularization. GSF is tested under uniform impedance factors of
+0.1, 10 and 100 and by integrated--standalone equivalence. ESC is tested by
+forward--inverse reconstruction and at $0.5\times$, $1\times$ and $2\times$ each
+nominal reference. Sensitivity analyses are reported without selecting the most
+favourable setting after outcome inspection.
 
 \subsection{Statistical analysis}\label{sec:statistics}
 
+Deterministic gates are reported as pass/fail together with the underlying
+values and denominators. Continuous estimates use medians, interquartile ranges
+and 95\% confidence intervals from 2000 bootstrap resamples with seed 20261103.
+Resampling is grouped by physical cell, study or campaign, never by frequency
+point. With an appropriate human or synthetic reference, classification is
+summarized by balanced accuracy, macro-F1, sensitivity, specificity, predictive
+values, confusion matrices and abstention rate. Missing, indeterminate and
+abstained responses retain explicit denominators and are not silently converted
+to errors or successes.
+
+Before adjudication, categorical expert agreement is quantified by Cohen's
+$\kappa$ for quality, dominant response and intercalation-pseudocapacitance
+compatibility, and by weighted $\kappa$ for ordered process count and confidence.
+Raw agreement and grouped bootstrap intervals are also reported. Subgroup
+analyses are secondary and exploratory. No passing endpoint compensates for a
+failed primary gate, and no result is selected between the integrated and
+standalone implementation based on favourability.
+
 \subsection{Software and computational reproducibility}\label{sec:software}
+
+KAIRIS is implemented in Python using NumPy, SciPy, pandas and Matplotlib, with
+interactive reporting in D3.js. The effective environment is locked for release,
+and automated tests target Windows, Ubuntu and macOS with Python~3.12. The
+command-line interface supports one-shot execution, continuous directory
+monitoring, explicit overwrite policy and LLM on/off controls. A local web panel
+exposes the same pipeline rather than a separate analytical implementation.
+
+Every release-validation run starts from a clean Git commit and an empty output
+directory. Input and output manifests, atomic artifacts, resolved configuration,
+software versions and platform information are archived. Container execution
+runs without root privileges and without an LLM by default. Code, protocol,
+tests, public-data attribution and the exact manuscript sources are maintained
+in the public repository; a versioned archival DOI will be assigned before
+submission in accordance with FAIR reuse principles \cite{Wilkinson2016FAIR}.
 
 \section{Results}\label{sec:results}
 

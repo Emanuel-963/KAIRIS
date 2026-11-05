@@ -23,9 +23,12 @@ separáveis:
 3. **ESC independente**, mantido na branch `standalone/esc`, congelada inicialmente
    no commit `311f0c072193c1a36b289d63b0f4228f84e3d4eb`.
 
-GSF e ESC são métodos originais do autor do KAIRIS. A disponibilização autônoma
-não os remove do protocolo integrado nem transforma suas saídas em evidência
-causal de mecanismos eletroquímicos.
+O GSF/RSF e a estrutura eletroquímica da ESC são contribuições metodológicas
+propostas no KAIRIS. A ESC, nome oficial de **Electrochemical Spectral
+Cartography**, utiliza a transformação bilinear clássica de Smith; nenhuma
+originalidade é atribuída à transformação em si. A disponibilização autônoma
+dos módulos não os remove do protocolo integrado nem transforma suas saídas em
+evidência causal de mecanismos eletroquímicos.
 
 O congelamento v1.0 fixa perguntas, endpoints, métricas, limiares e política de
 mudanças para o corpus já conhecido. Ele não converte retrospectivamente esses

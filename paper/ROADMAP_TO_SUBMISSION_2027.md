@@ -154,9 +154,11 @@ Comparações mínimas:
 8. análise estratificada de arcos incompletos, componentes indutivos e processos
    sobrepostos.
 
-Para GSF e ESC, que são métodos originais, a validação deve combinar equivalência
-de implementação, invariantes matemáticos, referências sintéticas com verdade
-conhecida, sensibilidade e associação externa. Não se deve inventar um comparador
+Para GSF/RSF e para a estrutura eletroquímica da Electrochemical Spectral
+Cartography (ESC), a validação deve combinar equivalência de implementação,
+invariantes matemáticos, referências sintéticas com verdade conhecida,
+sensibilidade e associação externa. A transformação bilinear de Smith usada
+pela ESC é clássica e não é reivindicada como original. Não se deve inventar um comparador
 “padrão-ouro” que não exista nem afirmar superioridade sem teste apropriado.
 
 Gate C:

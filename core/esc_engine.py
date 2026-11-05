@@ -1,4 +1,4 @@
-"""Emanuel-Smith Chart transform and reflection metrics."""
+"""Electrochemical Spectral Cartography using a classical Smith transform."""
 
 from __future__ import annotations
 
@@ -16,6 +16,9 @@ def as_complex_reference(value: Any) -> complex:
 
 
 def transform_esc(z: np.ndarray, z0: Any) -> np.ndarray:
+    # ESC uses the classical impedance-to-reflection-coefficient bilinear
+    # transform. KAIRIS claims no originality for this Smith mapping; its
+    # contribution is the electrochemical reference framework and descriptors.
     reference = as_complex_reference(z0)
     denominator = z + reference
     safe = np.abs(denominator) > np.finfo(float).eps

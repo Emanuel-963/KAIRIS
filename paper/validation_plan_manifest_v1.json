@@ -18,9 +18,9 @@
     }
   },
   "sha256": {
-    "paper/VALIDATION_PLAN_v1.md": "7ecb5710df5c4a406355d2d20192175573758d36bba75d5668097ce187a42bfb",
-    "paper/BLINDED_REVIEW_PROTOCOL_v1.md": "f4790105ea040d4700e7e32c2e929e2789a01f56eb1b9fd34874c912907d2060",
-    "paper/DEVIATIONS_LOG_v1.md": "e8e17b8debdacce4fcfd7152de9c43e9482ce65f91f2ff114fa2d01f21e6100e",
+    "paper/VALIDATION_PLAN_v1.md": "3e35dd5d9cce5243d5f1034a262102239673d62893b485c735cd3f7a41541280",
+    "paper/BLINDED_REVIEW_PROTOCOL_v1.md": "7c2e1d5bba12b599541a26280d50f22657395632d6525e50937264f64ba7fdb1",
+    "paper/DEVIATIONS_LOG_v1.md": "4e4961bd5973524666c9b38d055fb68c67638184bb86e0621f1012dafa2fbada",
     "paper/PREREGISTRATION_RECORD_v1.md": "1ce4fa2663821b022d808961b8f20e3c6b09c813e0bdaaf697e0933f50fcb395",
     "config/validation_acceptance_v1.json": "54bea1804fd55b918b0a7a29f5e96c379f5ec04f8de9733069d6ae2bd3509561",
     "config/standalone_validation_acceptance_v1.json": "7776f8af27d4254ff6990bd99474a89f33e13038d4a2ce936fde1b77e5e9aeac"
