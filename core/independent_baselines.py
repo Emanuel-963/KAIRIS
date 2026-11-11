@@ -8,7 +8,9 @@ metrics and JSON-serializable outputs for the preregistered comparisons.
 from __future__ import annotations
 
 from collections.abc import Callable
+from contextlib import redirect_stdout
 from importlib import metadata
+from io import StringIO
 from typing import Any
 
 import numpy as np
@@ -66,7 +68,8 @@ def run_impedance_lin_kk(
     """Run impedance.py Lin-KK with KAIRIS-normalized comparison metrics."""
     f, z = prepare_eis_arrays(frequency, real, imag)
     compatibility_patch = False
-    if solver is None:
+    package_solver = solver is None
+    if package_solver:
         try:
             from impedance.models.circuits.elements import circuit_elements
             from impedance.validation import linKK
@@ -85,14 +88,19 @@ def run_impedance_lin_kk(
     cutoff = float(config.get("lin_kk_mu_cutoff", 0.85))
     max_m = int(config.get("lin_kk_max_rc_elements", 50))
     add_cap = bool(config.get("lin_kk_add_capacitance", False))
-    m, mu, fitted, residual_real, residual_imag = solver(
-        f,
-        z,
-        c=cutoff,
-        max_M=max_m,
-        fit_type="complex",
-        add_cap=add_cap,
-    )
+    call_kwargs = {
+        "c": cutoff,
+        "max_M": max_m,
+        "fit_type": "complex",
+        "add_cap": add_cap,
+    }
+    if package_solver:
+        # impedance.py prints intermediate RC iterations unconditionally.
+        # Keep batch output machine-readable without modifying its equations.
+        with redirect_stdout(StringIO()):
+            m, mu, fitted, residual_real, residual_imag = solver(f, z, **call_kwargs)
+    else:
+        m, mu, fitted, residual_real, residual_imag = solver(f, z, **call_kwargs)
     fitted = np.asarray(fitted, dtype=complex)
     if fitted.shape != z.shape:
         raise ValueError("impedance.py returned a fitted spectrum with an invalid shape")
