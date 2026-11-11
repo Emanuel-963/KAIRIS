@@ -1,0 +1,4 @@
+# Optional scientific baseline environment; not required to run KAIRIS.
+# Install only in an isolated validation environment after explicit approval.
+impedance==1.7.1
+pyimpspec==5.2.0
