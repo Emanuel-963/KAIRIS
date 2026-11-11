@@ -1,4 +1,5 @@
 .venv/
+.venv-validation/
 .test_deps/
 .kairis_smoke/
 .agent_cli_test/

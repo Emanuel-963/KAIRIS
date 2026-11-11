@@ -2,7 +2,7 @@
 
 **Decision date:** 11 November 2026  
 **Scope:** supporting comparisons; no change to registered P1/P2 definitions  
-**Installation status:** not installed by this document  
+**Installation status:** installed and smoke-tested in isolated environment
 **External 42-case outputs inspected:** no
 
 ## 1. Purpose
@@ -137,16 +137,38 @@ freeze, the project must record:
 Installation or downloads remain explicit and user-confirmed. The packages are
 not required for normal KAIRIS execution.
 
-## 7. Acceptance before implementation
+## 7. Operational freeze and smoke-test result
 
-This candidate selection becomes operational only after:
+The candidate selection became operational on 11 November 2026 after:
 
-- a smoke test on synthetic fixtures;
-- confirmation that both packages install in an isolated Python 3.12
-  environment;
-- inspection of sign conventions and time-constant conventions;
-- a frozen comparison schema and output manifest;
-- a decision on the primary pyimpspec TR-NNLS mode before external execution.
+- installation of `impedance==1.7.1` and `pyimpspec==5.2.0` in isolated
+  Python 3.12.14 on Windows;
+- a smoke test on all six synthetic `randles_rc` fixtures;
+- inspection of impedance and time-constant sign conventions;
+- freezing `config/baseline_comparison_schema_v1.json`;
+- selection of TR-NNLS `mode="real", lambda_value=-1.0` as the primary DRT
+  comparison before any external output was generated;
+- retention of imaginary-mode and L-curve (`lambda_value=-2.0`) conditions as
+  declared sensitivity analyses.
 
-Until those steps pass, the versions are candidates, not validated baselines.
+All four DRT conditions recovered one peak in each of the six simple Randles
+fixtures. Primary-mode normalized complex reconstruction RMSE ranged from
+0.223% to 0.959%. The independent Lin-KK implementation did not meet the
+KAIRIS pass thresholds on these noisy fixtures (RMSE 15.20%–32.69%). This
+difference is retained as an implementation-disagreement result; thresholds
+or stopping rules were not retuned to force agreement.
+
+`impedance.py 1.7.1` omits `numpy` from the evaluation namespace used by its
+generated Lin-KK circuit expression. The adapter supplies that namespace entry
+without changing the package equations and records the compatibility action in
+each output.
+
+The exact transitive environment is in `requirements-validation.lock`. The
+input pin file SHA-256 is
+`c35b015597554f22c81282c6bf4e58ac4763db3b8330a3fba4a543b42a592081`.
+Generated smoke evidence remains under ignored `output/`; it contains no
+external-confirmatory result.
+
+These are now validated *comparison implementations*, not proof of mechanistic
+ground truth. The 42-case external cohort remains locked.
 

@@ -1,0 +1,56 @@
+{
+  "schema_version": "1.0",
+  "frozen_on": "2026-11-11",
+  "external_outputs_inspected_before_freeze": false,
+  "lin_kk": {
+    "implementation": "impedance.validation.linKK",
+    "version": "1.7.1",
+    "fit_type": "complex",
+    "metrics": [
+      "normalized_complex_rmse_pct",
+      "failure_pct",
+      "rc_elements",
+      "mu"
+    ],
+    "threshold_source": "config/protocol_config.json"
+  },
+  "drt": {
+    "implementation": "pyimpspec.calculate_drt_tr_nnls",
+    "version": "5.2.0",
+    "primary_condition": {
+      "mode": "real",
+      "lambda_value": -1.0,
+      "lambda_rule": "pyimpspec automatic suggestion"
+    },
+    "sensitivity_conditions": [
+      {
+        "mode": "imaginary",
+        "lambda_value": -1.0,
+        "lambda_rule": "pyimpspec automatic suggestion"
+      },
+      {
+        "mode": "real",
+        "lambda_value": -2.0,
+        "lambda_rule": "L-curve corner search"
+      },
+      {
+        "mode": "imaginary",
+        "lambda_value": -2.0,
+        "lambda_rule": "L-curve corner search"
+      }
+    ],
+    "peak_threshold_fraction": 0.05,
+    "area_convention": "integral gamma d(ln tau)",
+    "metrics": [
+      "normalized_complex_rmse_pct",
+      "lambda_effective",
+      "pseudo_chisqr",
+      "peak_count",
+      "peak_tau_s",
+      "peak_gamma_ohm",
+      "integrated_area_log_tau_ohm"
+    ]
+  },
+  "failure_policy": "retain and count every failed or nonconverged case",
+  "external_policy": "no tuning; execute only after preregistration and coordinator unlock"
+}
