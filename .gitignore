@@ -1,4 +1,5 @@
 .venv/
+kairis_protocol.egg-info/
 .test_deps/
 .kairis_smoke/
 .agent_cli_test/
