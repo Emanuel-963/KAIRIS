@@ -8,6 +8,9 @@ data/validation/kairis_eis_validation_v1/**/*.txt -text
 *.sh text eol=lf
 
 # Frozen validation records use byte-stable hashes across operating systems.
+config/external_validation_plan_v1.json text eol=lf
+config/protocol_config.json text eol=lf
+paper/EXTERNAL_REVIEWER_INSTRUCTIONS_v1.md text eol=lf
 paper/VALIDATION_PLAN_v1.md text eol=lf
 paper/BLINDED_REVIEW_PROTOCOL_v1.md text eol=lf
 paper/DEVIATIONS_LOG_v1.md text eol=lf
