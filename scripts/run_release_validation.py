@@ -128,6 +128,8 @@ def main() -> int:
         "config_sha256": _sha256(args.config.resolve()),
         "output": str(output),
         "llm_enabled": False,
+        "llm_memory_enabled": False,
+        "supervised_learning_enabled": False,
         "results_reused": False,
         "acceptance_report": str(evaluation),
     }

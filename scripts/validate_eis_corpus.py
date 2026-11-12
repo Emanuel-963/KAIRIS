@@ -83,7 +83,11 @@ def full_pipeline(
     run_pipeline.ensure_output_structure(output)
     run_pipeline.configure_logging(output)
     effective = dict(config)
-    effective["llm_enabled"] = False
+    effective.update(
+        llm_enabled=False,
+        llm_memory_enabled=False,
+        supervised_learning_enabled=False,
+    )
     selected = [row for row in audit if row["file_status"] == "valid"]
     if limit is not None:
         selected = selected[:limit]
@@ -188,6 +192,8 @@ def main() -> int:
         "pipeline_failed": failures,
         "drt_gsf_disagreements_with_report": disagreements,
         "llm_enabled": False,
+        "llm_memory_enabled": False,
+        "supervised_learning_enabled": False,
     }
     evidence = (
         args.evidence_dir.resolve()

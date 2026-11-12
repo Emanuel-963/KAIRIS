@@ -34,5 +34,16 @@ def test_validation_freeze_manifest_matches_file_bytes():
 
     assert manifest["status"] == "publicly_frozen_retrospective_not_osf_preregistered"
     for relative, expected in manifest["sha256"].items():
-        observed = hashlib.sha256((PROJECT / relative).read_bytes()).hexdigest()
-        assert observed == expected, relative
+        content = (PROJECT / relative).read_bytes()
+        if relative == "paper/DEVIATIONS_LOG_v1.md":
+            # The log is append-only. Verify its exact frozen prefix while
+            # permitting dated entries written after the freeze.
+            digest = hashlib.sha256()
+            for line in content.splitlines(keepends=True):
+                digest.update(line)
+                if digest.hexdigest() == expected:
+                    break
+            else:
+                raise AssertionError(f"Frozen prefix changed: {relative}")
+        else:
+            assert hashlib.sha256(content).hexdigest() == expected, relative
