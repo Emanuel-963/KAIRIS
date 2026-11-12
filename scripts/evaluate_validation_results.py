@@ -62,9 +62,15 @@ def evaluate(
     output: Path,
     acceptance: dict[str, Any],
     current_commit: str | None = None,
+    *,
+    sample_ids: set[str] | None = None,
 ) -> dict[str, Any]:
     """Return descriptive results and pass/fail development gates."""
     manifest = _csv_rows(corpus / "dataset_manifest.csv")
+    if sample_ids is not None:
+        manifest = [row for row in manifest if row["sample_id"] in sample_ids]
+        if not sample_ids or {row["sample_id"] for row in manifest} != sample_ids:
+            raise ValueError("Unknown or empty sample selection")
     truth = {
         row["sample_id"]: row for row in _csv_rows(corpus / "synthetic_truth.csv")
     }
