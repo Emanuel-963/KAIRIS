@@ -95,6 +95,8 @@ def build_bundle(destination: Path, *, require_clean: bool = True) -> dict[str, 
         raise RuntimeError(
             "The OSF bundle requires a clean Git tree so every attached file has a committed identity."
         )
+    builder_commit = _git("rev-parse", "HEAD")
+    source_commit = builder_commit if not tracked_status else None
     payloads: dict[str, bytes] = {}
     for relative in PUBLIC_FILES:
         path = PROJECT / relative
@@ -112,15 +114,18 @@ def build_bundle(destination: Path, *, require_clean: bool = True) -> dict[str, 
         "It intentionally excludes reviewer identities, affiliations, ORCIDs, conflict "
         "declarations, the coordinator blinding key, KAIRIS outputs and the 42 converted "
         "case files. The public dataset is referenced by DOI and cryptographic hash.\n\n"
-        f"Frozen analysis commit: `{freeze['analysis_code_commit']}`  \n"
+        f"Original scientific freeze commit: `{freeze['analysis_code_commit']}`  \n"
         f"Frozen Git tag: `{freeze['git_tag']}`\n"
+        f"Attached analysis source commit: `{source_commit or 'uncommitted working tree'}`\n"
+        "See the deviation log for implementation corrections to the frozen plan.\n"
     ).encode("utf-8")
     payloads["README_UPLOAD.md"] = readme
     manifest = {
         "format": "KAIRIS-OSF-registration-bundle-v1",
         "analysis_code_commit": freeze["analysis_code_commit"],
         "analysis_git_tag": freeze["git_tag"],
-        "bundle_builder_commit": _git("rev-parse", "HEAD"),
+        "bundle_builder_commit": builder_commit,
+        "attached_analysis_source_commit": source_commit,
         "deterministic_zip_timestamp": "2026-11-05T23:38:14Z",
         "privacy": {
             "reviewer_identifiers_included": False,

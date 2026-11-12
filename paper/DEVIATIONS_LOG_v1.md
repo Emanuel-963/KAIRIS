@@ -39,3 +39,20 @@ Todo registro futuro deverá informar:
 7. classificação como correção de bug, emenda pré-dados ou desvio pós-dados.
 
 Entradas não serão apagadas. Correções serão acrescentadas como novas entradas.
+
+## 12 de novembro de 2026 — correção do denominador de P2
+
+- **Responsável pela implementação:** Codex, a pedido do pesquisador.
+- **Etapa afetada:** análise confirmatória P2 em
+  `scripts/analyze_external_confirmation.py`. Referência original:
+  `94a03c366b0d26ec8f2e05befed0660fb2ff0f1d`.
+- **Descrição:** o analisador registrava os casos elegíveis com JSON ausente
+  e depois os excluía da matriz, das métricas e do bootstrap. Agora esses
+  casos recebem a resposta de avaliação `undetermined` e conservam o
+  registro separado de saída ausente.
+- **Momento e impacto:** correção pré-análise, verificada com dados simulados.
+  Aplica o denominador definido no plano congelado e afeta P2 quando falta
+  uma saída em caso com consenso elegível. A identidade da versão corrigida
+  será registrada no commit que incorporar esta correção e no pacote OSF
+  regenerado antes do registro.
+- **Classificação:** correção de implementação do endpoint congelado.

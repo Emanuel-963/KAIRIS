@@ -247,7 +247,9 @@ determine success.
 ## 15. Missing data, nonconvergence and abstention
 
 - no missing human value is imputed;
-- no missing KAIRIS output is imputed;
+- an absent KAIRIS output is recorded separately. When human consensus makes
+  the case eligible for P2, the missing response is scored as an abstention
+  and remains in the denominator;
 - human disagreement and human indetermination are reported as lack of human
   consensus;
 - Lin–KK invalidity, required-module failure, an unmapped DRT–GSF combination,

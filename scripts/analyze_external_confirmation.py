@@ -131,13 +131,17 @@ def analyze(
         metrics_path = output / "metrics" / f"{case_id}_metrics.json"
         if not metrics_path.is_file():
             missing_outputs.append(case_id)
-            continue
-        metrics = json.loads(metrics_path.read_text(encoding="utf-8"))
+            # Eligibility is defined by human consensus. A missing response
+            # is scored as an abstention and recorded separately for audit.
+            prediction = "undetermined"
+        else:
+            metrics = json.loads(metrics_path.read_text(encoding="utf-8"))
+            prediction = derive_kairis_response(metrics["summary"])
         comparison_rows.append(
             {
                 "case_id": case_id,
                 "truth": consensus,
-                "prediction": derive_kairis_response(metrics["summary"]),
+                "prediction": prediction,
                 "bootstrap_group": str(mapping[case_id]["source_subgroup"]),
             }
         )
