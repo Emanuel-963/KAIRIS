@@ -50,7 +50,7 @@ class Agent4_ESC:
                     "points": [],
                 }
                 continue
-            group = calculate_group(z, reference)
+            group = calculate_group(z, reference, frequency)
             output[group_name] = {key: value for key, value in group.items() if key != "gamma"}
             output[group_name]["points"] = [
                 {
@@ -65,10 +65,13 @@ class Agent4_ESC:
 
         g2 = output["G2"]
         interpretations = []
-        if g2["lf_point"][0] > 0.8:
-            interpretations.append("Difusão domina completamente em baixa frequência.")
-        if g2["gamma_mean"] < 0.3:
-            interpretations.append("Sistema próximo ao cruzamento difusivo em toda a faixa.")
+        if g2.get("status") == "abstained":
+            interpretations.append("G2 sem interpretação: referência indisponível.")
+        else:
+            if g2["lf_point"][0] > 0.8:
+                interpretations.append("Difusão domina completamente em baixa frequência.")
+            if g2["gamma_mean"] < 0.3:
+                interpretations.append("Sistema próximo ao cruzamento difusivo em toda a faixa.")
         output["G2_interpretation"] = interpretations or ["Sem condição-limite de G2 detectada."]
         output["figures"] = []
         return output
