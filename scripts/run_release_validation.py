@@ -5,10 +5,13 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import platform
 import subprocess
 import sys
 from datetime import datetime, timezone
+from importlib.metadata import version
 from pathlib import Path
+from time import perf_counter
 from typing import Any
 
 
@@ -17,6 +20,7 @@ if str(PROJECT) not in sys.path:
     sys.path.insert(0, str(PROJECT))
 
 from core.artifact_io import atomic_write_text  # noqa: E402
+from setup_kairis import total_memory_gb  # noqa: E402
 
 
 def _git(*arguments: str, check: bool = True) -> subprocess.CompletedProcess[str]:
@@ -81,6 +85,7 @@ def main() -> int:
     output.mkdir(parents=True, exist_ok=True)
     evidence = output / "evidence"
     started = datetime.now(timezone.utc).isoformat()
+    start = perf_counter()
 
     validate_command = [
         sys.executable,
@@ -110,8 +115,9 @@ def main() -> int:
             "--enforce",
         ]
     )
-    if _git("status", "--porcelain").stdout.strip():
-        raise RuntimeError("A execução alterou a árvore Git; a evidência não é limpa.")
+    final_commit, _ = _release_identity(require_tag=False)
+    if final_commit != commit:
+        raise RuntimeError("O commit mudou durante a validação de release.")
 
     manifest: dict[str, Any] = {
         "format": "KAIRIS-release-validation-run-v1",
@@ -119,7 +125,14 @@ def main() -> int:
         "completed_at": datetime.now(timezone.utc).isoformat(),
         "git_commit": commit,
         "git_tag": tag,
+        "platform": platform.platform(),
+        "architecture": platform.machine(),
+        "physical_ram_gib": round(total_memory_gb(), 2),
+        "elapsed_seconds": round(perf_counter() - start, 3),
         "python": sys.version,
+        "package_versions": {
+            name: version(name) for name in ("numpy", "scipy", "pandas", "matplotlib")
+        },
         "corpus": str(args.corpus.resolve()),
         "corpus_manifest_sha256": _sha256(
             args.corpus.resolve() / "dataset_manifest.csv"

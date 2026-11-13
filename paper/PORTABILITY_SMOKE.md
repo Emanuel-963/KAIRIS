@@ -21,6 +21,19 @@ critérios de aceite dos seis casos. Para comparar ambientes, confira esses
 campos e as métricas dentro das tolerâncias registradas.
 
 O workflow **Portability smoke** executa a mesma verificação em Ubuntu, macOS e
-Windows. Baixe o artefato de cada job para guardar a evidência. Para evidência
-em máquinas de 4–8 GB, execute o mesmo comando num equipamento ou VM com essa
-memória. A RAM registrada no JSON identifica o ambiente que efetivamente rodou.
+Windows. No GitHub Actions, selecione o ramo de release e ative
+`full_corpus` em **Run workflow** para executar também os 198 espectros
+retrospectivos em cada plataforma. Os artefatos `portability-full-*`
+incluem o manifesto do ambiente, a avaliação dos dez critérios e o log.
+
+Para executar o mesmo teste integral em uma máquina independente, rode
+na raiz do checkout com o ambiente Python ativo:
+
+```sh
+python scripts/run_release_validation.py --output output/portability-full
+```
+
+Repita em uma máquina ou VM com 4 GB e outra com 8 GB para documentar esses
+perfis. Registre a RAM efetiva, o commit, os hashes do manifesto e da
+configuração, o tempo de execução e o resultado dos critérios a partir do
+diretório `output/portability-full/evidence/`.
