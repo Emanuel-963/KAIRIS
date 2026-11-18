@@ -1,0 +1,45 @@
+name: Release memory limits
+
+on:
+  push:
+    branches: [ci/release-memory]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  full-corpus:
+    name: Full retrospective corpus with ${{ matrix.gib }} GiB RAM
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        gib: [4, 8]
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: pyproject.toml
+      - name: Install KAIRIS
+        run: python -m pip install -e .
+      - name: Run under the memory limit
+        env:
+          KAIRIS_MEMORY_GIB: ${{ matrix.gib }}
+        run: |
+          output="$PWD/output/release-memory-${KAIRIS_MEMORY_GIB}"
+          sudo systemd-run --wait --pipe --collect \
+            --uid="$(id -u)" --gid="$(id -g)" --working-directory="$PWD" \
+            --property="MemoryMax=${KAIRIS_MEMORY_GIB}G" --property=MemorySwapMax=0 \
+            --setenv=MPLBACKEND=Agg --setenv=OPENBLAS_NUM_THREADS=1 --setenv=OMP_NUM_THREADS=1 \
+            bash scripts/run_release_memory_check.sh "$(command -v python)" "$output" "$KAIRIS_MEMORY_GIB"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: portability-memory-${{ matrix.gib }}-gib
+          path: |
+            output/release-memory-${{ matrix.gib }}/evidence/
+            output/release-memory-${{ matrix.gib }}/pipeline.log
