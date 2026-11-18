@@ -55,7 +55,9 @@ jobs:
           if-no-files-found: warn
 
   full-corpus:
-    if: github.event_name == 'workflow_dispatch' && inputs.full_corpus
+    if: |
+      (github.event_name == 'workflow_dispatch' && inputs.full_corpus) ||
+      (github.event_name == 'push' && startsWith(github.ref, 'refs/heads/release/'))
     name: Full retrospective run on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     timeout-minutes: 45

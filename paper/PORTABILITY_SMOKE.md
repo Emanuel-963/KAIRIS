@@ -21,9 +21,9 @@ critérios de aceite dos seis casos. Para comparar ambientes, confira esses
 campos e as métricas dentro das tolerâncias registradas.
 
 O workflow **Portability smoke** executa a mesma verificação em Ubuntu, macOS e
-Windows. No GitHub Actions, selecione o ramo de release e ative
-`full_corpus` em **Run workflow** para executar também os 198 espectros
-retrospectivos em cada plataforma. Os artefatos `portability-full-*`
+Windows. O envio de um ramo `release/*` ao GitHub também executa os 198
+espectros retrospectivos em cada plataforma. Nas execuções manuais, use
+a opção `full_corpus`. Os artefatos `portability-full-*`
 incluem o manifesto do ambiente, a avaliação dos dez critérios e o log.
 
 Para executar o mesmo teste integral em uma máquina independente, rode
